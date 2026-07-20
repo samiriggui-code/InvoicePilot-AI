@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Dolibarr">
+  <title>Dolibarr</title>
+  <rect width="48" height="48" rx="12" fill="#263C5A"/>
+  <path fill="#FFFFFF" d="M10 14h8.4c6.6 0 11 3.5 11 9.5S25 33 18.4 33H10V14zm7.2 5.2v8.6h1c2.9 0 4.7-1.5 4.7-4.3 0-2.8-1.8-4.3-4.7-4.3h-1z"/>
+  <circle cx="35.5" cy="24" r="5.5" fill="#4BA3E3"/>
+</svg>

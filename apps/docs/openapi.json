@@ -1,0 +1,447 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "InvoicePilot AI API",
+    "version": "2026.2",
+    "description": "API pont conformité e-facture. Pipeline : validate → remediate → render → emit. Solution compatible — pas une PA. Auth sandbox : `Bearer ip_sandbox_demo`.",
+    "contact": {
+      "name": "InvoicePilot AI",
+      "email": "api@invoicepilot.ai"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8081/api/v1",
+      "description": "Sandbox locale"
+    },
+    {
+      "url": "/api/v1",
+      "description": "Same-origin"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Sandbox : `ip_sandbox_demo` — Live : `ip_live_…`"
+      },
+      "apiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Api-Key"
+      }
+    },
+    "schemas": {
+      "InvoiceLine": {
+        "type": "object",
+        "properties": {
+          "description": { "type": "string" },
+          "quantity": { "type": "number" },
+          "unit_price_ht": { "type": "number" },
+          "vat_rate": { "type": "number" }
+        }
+      },
+      "StructuredInvoice": {
+        "type": "object",
+        "properties": {
+          "format": {
+            "type": "string",
+            "enum": ["factur-x", "ubl", "cii"],
+            "default": "factur-x"
+          },
+          "invoice_id": { "type": "string" },
+          "buyer": {
+            "type": "object",
+            "properties": {
+              "siren": { "type": "string", "example": "552100554" },
+              "legal_name": { "type": "string" },
+              "vat": { "type": "string" }
+            }
+          },
+          "seller": {
+            "type": "object",
+            "properties": {
+              "siren": { "type": "string", "example": "512345678" },
+              "legal_name": { "type": "string" }
+            }
+          },
+          "operation_category": {
+            "type": "string",
+            "enum": ["GOODS", "SERVICES", "MIXED"]
+          },
+          "issue_date": { "type": "string", "format": "date" },
+          "service_date": { "type": "string", "format": "date" },
+          "delivery_differs": { "type": "boolean" },
+          "delivery": {
+            "type": "object",
+            "properties": {
+              "line1": { "type": "string" },
+              "city": { "type": "string" },
+              "postal": { "type": "string" }
+            }
+          },
+          "lines": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/InvoiceLine" }
+          },
+          "patches": {
+            "type": "object",
+            "description": "Utilisé par /remediate",
+            "properties": {
+              "buyer_siren": { "type": "string" },
+              "operation_category": {
+                "type": "string",
+                "enum": ["GOODS", "SERVICES", "MIXED"]
+              },
+              "issue_date": { "type": "string" },
+              "service_date": { "type": "string" },
+              "delivery_line1": { "type": "string" },
+              "delivery_city": { "type": "string" }
+            }
+          },
+          "pdp": { "type": "string", "description": "Slug PA (emit)" },
+          "options": {
+            "type": "object",
+            "description": "Mode legacy — préférer body structuré",
+            "properties": {
+              "strict": { "type": "boolean" },
+              "check_siret": { "type": "boolean" },
+              "siren": { "type": "string" },
+              "vat": { "type": "string" }
+            }
+          }
+        }
+      },
+      "ValidationResult": {
+        "type": "object",
+        "properties": {
+          "valid": { "type": "boolean" },
+          "score": { "type": "number" },
+          "errors": { "type": "array", "items": { "type": "string" } },
+          "warnings": { "type": "array", "items": { "type": "string" } },
+          "checks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": { "type": "string" },
+                "label": { "type": "string" },
+                "ok": { "type": "boolean" }
+              }
+            }
+          },
+          "suggestions": { "type": "array", "items": { "type": "object" } },
+          "mode": { "type": "string", "example": "sandbox" }
+        }
+      }
+    }
+  },
+  "security": [{ "bearerAuth": [] }, { "apiKey": [] }],
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "getHealth",
+        "summary": "Santé API",
+        "security": [],
+        "tags": ["System"],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": { "type": "boolean" },
+                    "mode": { "type": "string" },
+                    "version": { "type": "string" },
+                    "endpoints": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/invoices/validate": {
+      "post": {
+        "operationId": "validateInvoice",
+        "summary": "Valider (étape VALIDATE)",
+        "description": "Contrôles mentions 2026 + format. Corps structuré `buyer` / `lines` recommandé.",
+        "tags": ["Pipeline"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/StructuredInvoice" },
+              "example": {
+                "format": "factur-x",
+                "buyer": { "siren": "552100554", "legal_name": "ACME SAS" },
+                "seller": { "siren": "512345678", "legal_name": "Dupont Conseil" },
+                "operation_category": "SERVICES",
+                "issue_date": "2026-07-17",
+                "service_date": "2026-07-17",
+                "lines": [
+                  {
+                    "description": "Conseil",
+                    "quantity": 1,
+                    "unit_price_ht": 100,
+                    "vat_rate": 20
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Résultat",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationResult" }
+              }
+            }
+          },
+          "401": { "description": "Non autorisé" }
+        }
+      }
+    },
+    "/invoices/remediate": {
+      "post": {
+        "operationId": "remediateInvoice",
+        "summary": "Corriger (étape REMEDIATE)",
+        "description": "Applique `patches`, lookup SIREN optionnel, revalide.",
+        "tags": ["Pipeline"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/StructuredInvoice" },
+              "example": {
+                "format": "factur-x",
+                "buyer": { "legal_name": "ACME" },
+                "patches": {
+                  "buyer_siren": "552100554",
+                  "operation_category": "SERVICES"
+                },
+                "issue_date": "2026-07-17",
+                "service_date": "2026-07-17",
+                "lines": [
+                  {
+                    "description": "Conseil",
+                    "quantity": 1,
+                    "unit_price_ht": 100,
+                    "vat_rate": 20
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Invoice fusionnée + validation" },
+          "401": { "description": "Non autorisé" }
+        }
+      }
+    },
+    "/invoices/render": {
+      "post": {
+        "operationId": "renderInvoice",
+        "summary": "Générer Factur-X (étape RENDER)",
+        "description": "XML Factur-X / CII POC. Refuse si contrôles bloquants.",
+        "tags": ["Pipeline"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/StructuredInvoice" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "XML + summary + totals" },
+          "422": { "description": "Validation échouée" },
+          "401": { "description": "Non autorisé" }
+        }
+      }
+    },
+    "/invoices/emit": {
+      "post": {
+        "operationId": "emitInvoice",
+        "summary": "Émettre / déposer (étape SUBMIT)",
+        "description": "Sandbox : acceptation simulée. Live : accepté côté InvoicePilot — transmission via PA connectée.",
+        "tags": ["Pipeline"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/StructuredInvoice" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Accepté" },
+          "422": { "description": "Bloqué — remediate puis render" },
+          "401": { "description": "Non autorisé" }
+        }
+      }
+    },
+    "/sources/import": {
+      "post": {
+        "operationId": "importSource",
+        "summary": "Simuler un import Sources",
+        "description": "Sandbox : importe N factures fictives depuis une source (PDF, Shopify, Woo…). Pas de sync réelle.",
+        "tags": ["Sources"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "enum": [
+                      "MANUAL_UPLOAD",
+                      "SHOPIFY",
+                      "WOOCOMMERCE",
+                      "PRESTASHOP",
+                      "WIX",
+                      "GENERIC_HTTP",
+                      "API_PUSH"
+                    ],
+                    "example": "SHOPIFY"
+                  },
+                  "filename": { "type": "string" },
+                  "orders_count": { "type": "integer", "minimum": 1, "maximum": 50, "default": 1 }
+                }
+              },
+              "example": {
+                "source": "SHOPIFY",
+                "orders_count": 3
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Import simulé" },
+          "400": { "description": "Source invalide" },
+          "401": { "description": "Non autorisé" }
+        }
+      }
+    },
+    "/inbox": {
+      "get": {
+        "operationId": "listInbox",
+        "summary": "Réception PA — liste inbox",
+        "description": "Sandbox : factures fournisseurs fictives. Live : canal réception PA.",
+        "tags": ["Reception"],
+        "responses": {
+          "200": { "description": "Liste des factures reçues" },
+          "401": { "description": "Non autorisé" }
+        }
+      }
+    },
+    "/inbox/{id}/ack": {
+      "post": {
+        "operationId": "ackInboxItem",
+        "summary": "Approuver ou refuser une réception",
+        "description": "Traitement métier — Approuver ≠ payer.",
+        "tags": ["Reception"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "decision": { "type": "string", "enum": ["approve", "refuse"] },
+                  "reason": { "type": "string" }
+                }
+              },
+              "example": { "decision": "approve" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Décision enregistrée" },
+          "401": { "description": "Non autorisé" }
+        }
+      }
+    },
+    "/compliance/score": {
+      "get": {
+        "operationId": "getComplianceScore",
+        "summary": "Score de conformité",
+        "tags": ["Compliance"],
+        "responses": {
+          "200": { "description": "Score (sandbox ou live org)" },
+          "401": { "description": "Non autorisé" }
+        }
+      }
+    },
+    "/webhooks": {
+      "post": {
+        "operationId": "createWebhook",
+        "summary": "Enregistrer un webhook sortant",
+        "description": "URL HTTPS pour `invoice.*`.",
+        "tags": ["Webhooks"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["url"],
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "example": "https://votre-app.com/webhooks/invoicepilot"
+                  },
+                  "events": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "invoice.validated",
+                        "invoice.blocked",
+                        "invoice.ready",
+                        "invoice.emitted"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Webhook créé + secret" },
+          "400": { "description": "URL invalide" },
+          "401": { "description": "Non autorisé" }
+        }
+      }
+    }
+  },
+  "tags": [
+    { "name": "System" },
+    { "name": "Sources", "description": "Import ventes (sandbox simulé)" },
+    { "name": "Pipeline", "description": "validate → remediate → render → emit" },
+    { "name": "Reception", "description": "Inbox fournisseurs depuis la PA" },
+    { "name": "Compliance" },
+    { "name": "Webhooks" }
+  ]
+}

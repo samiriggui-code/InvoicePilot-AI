@@ -1,0 +1,18 @@
+﻿node.exe : npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm 
+help npmrc` for supported config options.
+Au caractère Ligne:1 : 1
++ & "C:\Program Files\nodejs/node.exe" "C:\Users\samir\AppData\Roaming\ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm warn Unknow...config options.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+session created for owner@dupont.fr
+status 200
+location null
+body length 12661
+title match <title>Tableau de bord ÔÇö InvoicePilot AI</title>
+has error phrase false
+has Process nav false
+has journey false
+has prep true
+OK snippet <!DOCTYPE html><html lang="fr"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="/src/styles.css" data-precedence="default"/><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=Outfit:wght@500;600;700&amp;display=swap" data-precedence="default"/><link rel="stylesheet" href="/@tanstack-start/styles.css?routes=

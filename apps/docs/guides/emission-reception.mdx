@@ -1,0 +1,61 @@
+---
+title: Émission & réception PA
+description: Déposer vers la PA, recevoir les factures fournisseurs
+---
+
+# Émission & réception PA
+
+InvoicePilot **n’est pas une PA**.  
+- **Émission** = dépôt vers *votre* plateforme agréée  
+- **Réception** = factures fournisseurs arrivées *via* votre PA
+
+## Émission (app + API)
+
+```
+Analyse Passé → Factur-X → POST /invoices/emit → PA
+```
+
+| Environnement | Résultat `emit` |
+|---------------|-----------------|
+| Sandbox (`ip_sandbox_demo`) | `sandbox_accepted` — pas d’appel PA réel |
+| Live + PA branchée | Accepté côté InvoicePilot — transmission via connecteur PA |
+
+```bash
+curl -X POST http://localhost:8081/api/v1/invoices/emit \
+  -H "Authorization: Bearer ip_sandbox_demo" \
+  -H "Content-Type: application/json" \
+  -d '{ "format":"factur-x", "buyer":{"siren":"552100554"}, ... }'
+```
+
+Pipeline recommandé : `validate` → `remediate` → `render` → `emit`.
+
+## Réception (inbox)
+
+| Environnement | Source des factures |
+|---------------|---------------------|
+| Sandbox | `GET /inbox` renvoie 2 factures fictives |
+| Live | Canal réception de la PA connectée |
+
+```bash
+# Lister
+curl http://localhost:8081/api/v1/inbox \
+  -H "Authorization: Bearer ip_sandbox_demo"
+
+# Approuver
+curl -X POST http://localhost:8081/api/v1/inbox/recv_xxx/ack \
+  -H "Authorization: Bearer ip_sandbox_demo" \
+  -H "Content-Type: application/json" \
+  -d '{"decision":"approve"}'
+```
+
+<Warning>
+  Approuver ≠ payer. C’est un traitement métier uniquement.
+</Warning>
+
+## UI correspondante
+
+| API | Page app |
+|-----|----------|
+| emit | Mon émission PA |
+| inbox / ack | Ma réception PA |
+| PA credentials | Ma plateforme agréée |

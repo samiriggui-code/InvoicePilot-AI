@@ -1,0 +1,16 @@
+---
+description: Each app page has its own KPIs under the title — never reuse dashboard/global KPIs
+globs: src/routes/_app/**/*.tsx,src/components/app/AppPage*.tsx,src/components/app/PageKpiCards.tsx
+alwaysApply: true
+---
+
+# Page KPIs — règle générale
+
+1. **Sous le titre** : les KPI sont toujours juste sous le titre (`AppPageHero` via `kpis`, ou `PageKpiCards` après un Toolbar).
+2. **Spécifiques à la page** : chaque page calcule / passe SES propres KPI (émission ≠ clients ≠ PA ≠ dashboard). Interdit de coller les mêmes 4 KPI partout.
+3. **Pas de bandeau global** : ne pas recharger de stats org dans `_app` layout pour les réafficher sur toutes les pages.
+4. **Dashboard** : une seule ligne de KPI (`buildDashboardKpis` / données `getDashboardData`) — pas de second bandeau identique.
+5. **Dimensions** : toujours via `PageKpiCards` — hauteur fixe `h-[116px]`, padding `p-4`, grille `xl:grid-cols-4`, label/value/hint en `truncate`. Ne pas customiser la taille carte par page.
+6. Style UI : `PageKpiCards` (gradients + icônes). Tables = DataGrid Metronic, pas de `<table>` custom.
+7. Pages formulaire / détail : KPI optionnels ; si présents, pertinents au contexte, pas les KPI dashboard.
+

@@ -1,0 +1,96 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "maple",
+  "name": "InvoicePilot AI",
+  "description": "Documentation développeur — sandbox API, Sources, émission / réception PA, Analyse IA & LLM. Solution compatible (pas une PA).",
+  "colors": {
+    "primary": "#3B5FCC",
+    "light": "#F8FAFC",
+    "dark": "#0B1220"
+  },
+  "search": {
+    "prompt": "Rechercher dans la doc…"
+  },
+  "api": {
+    "openapi": "openapi.json",
+    "playground": {
+      "display": "interactive"
+    },
+    "examples": {
+      "languages": ["curl", "javascript", "python", "php"],
+      "defaults": "required",
+      "prefill": true,
+      "autogenerate": true
+    },
+    "url": "full"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "1. Démarrage",
+            "icon": "rocket",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "authentication",
+              "sandbox"
+            ]
+          },
+          {
+            "group": "2. Parcours produit",
+            "icon": "diagram-project",
+            "pages": [
+              "guides/process-pont",
+              "guides/sources",
+              "guides/analyse-ia",
+              "guides/emission-reception",
+              "guides/validation",
+              "guides/plateformes-agregees",
+              "guides/webhooks"
+            ]
+          },
+          {
+            "group": "3. Réforme & déploiement",
+            "icon": "building",
+            "pages": ["reforme-2026", "deploy-vps"]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Sandbox API /api/v1",
+            "icon": "code",
+            "openapi": "openapi.json"
+          }
+        ]
+      }
+    ]
+  },
+  "logo": {
+    "light": "/logo-light.svg",
+    "dark": "/logo-dark.svg"
+  },
+  "favicon": "/brand-favicon.png",
+  "navbar": {
+    "links": [
+      {
+        "label": "Application",
+        "href": "http://localhost:8081"
+      },
+      {
+        "label": "Essai gratuit",
+        "href": "http://localhost:8081/signup"
+      }
+    ]
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com"
+    }
+  }
+}

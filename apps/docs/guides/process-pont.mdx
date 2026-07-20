@@ -1,0 +1,64 @@
+---
+title: Process pont (sources → PA)
+description: Architecture centre de tri — ingest, analyse, correction, dépôt et réception
+---
+
+# Process pont
+
+InvoicePilot est une **solution compatible** : pont entre les apps clients (Shopify, Woo, API, saisie…) et une **PA immatriculée DGFiP**.
+
+```
+Sources (CMS / CRM / API / upload)
+        │  ingest + SOURCE_RAW
+        ▼
+  Centre de tri (par organizationId)
+  1. Normaliser → CanonicalInvoice
+  2. VALIDATE
+  3. REMEDIATE (si bloqué)
+  4. RENDER Factur-X
+  5. SUBMIT → PA (outbox)
+  6. RECEIVE ← PA (inbox)
+  7. NOTIFY webhooks app cliente
+        │
+        ▼
+  PA immatriculée  ←→  réseau + DGFiP
+```
+
+## Ordre UI dans l’app
+
+| Étape | Menu | Rôle |
+|-------|------|------|
+| 1 | **Sources** `/integrations` | Brancher Shopify / Woo / API |
+| 2 | **Ma PA** `/platforms` | Choisir / connecter la PA |
+| 3 | **Émission** `/invoices` | Analyser → corriger → Factur-X → transmettre |
+| 4 | **Réception** `/inbox` | Factures fournisseurs via PA |
+| 5 | **E-reporting** | Hors e-invoicing (B2C / export) |
+
+## Stockage (centre de tri)
+
+Chaque artefact est scopé `org/{organizationId}/…` :
+
+| Kind | Contenu |
+|------|---------|
+| `SOURCE_RAW` | Payload CMS brut |
+| `CANONICAL_JSON` | Facture normalisée |
+| `FACTURX_XML` | XML généré |
+| `PA_SUBMIT` / `PA_RESPONSE` | Dépôt + ack PA |
+| `INBOUND_RAW` | Facture fournisseur reçue |
+
+Tables : `storage_objects`, `pipeline_jobs` — voir `docs/ARCHITECTURE_PONT.md`.
+
+## Pipeline API (même ordre)
+
+```
+POST /invoices/import     → INGEST
+POST /invoices/validate   → VALIDATE
+POST /invoices/remediate  → REMEDIATE
+POST /invoices/render     → RENDER
+POST /invoices/emit       → SUBMIT (sandbox ; prod = PA connectée)
+GET  /inbox               → RECEIVE (roadmap HTTP ; UI /inbox live)
+```
+
+<Info>
+  Les apps sources **ne parlent jamais** directement à une PA. Un seul format interne : `CanonicalInvoice`.
+</Info>

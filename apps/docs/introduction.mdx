@@ -1,0 +1,63 @@
+---
+title: Introduction
+description: Structure de la documentation InvoicePilot AI — sandbox, API, Sources, PA, LLM
+---
+
+# InvoicePilot AI — Documentation
+
+InvoicePilot AI est une **solution compatible** (pas une plateforme agréée).  
+Elle orchestre le parcours :
+
+```
+Sources → Analyse IA → Clients → Émission PA / Réception PA → E-reporting
+```
+
+| Couche | Rôle |
+|--------|------|
+| **App SaaS** | UI métier (Mes sources, Mon analyse IA, Mon émission PA…) |
+| **API `/api/v1`** | Même pipeline pour éditeurs / ERP (sandbox ou live) |
+| **PA** | Dépôt légal réel — InvoicePilot prépare, la PA transmet |
+
+## Services locaux
+
+| Service | Commande | URL |
+|---------|----------|-----|
+| App + sandbox API | `npm run dev` | [http://localhost:8081](http://localhost:8081) · API […/api/v1/health](http://localhost:8081/api/v1/health) |
+| Docs Mintlify | `npm run docs:dev` | [http://localhost:3004](http://localhost:3004) |
+
+<Info>
+  La **sandbox tourne déjà sur votre PC** avec l’app : clé `Bearer ip_sandbox_demo`.  
+  Le **LLM** (Ollama) est prévu pour le **VPS** (`docker-compose`) — en local, l’analyse utilise l’heuristique sauf `LLM_EXTRACT_ENABLED=true`.
+</Info>
+
+## Carte de la doc
+
+<CardGroup cols={2}>
+  <Card title="1. Quickstart" icon="rocket" href="/quickstart">
+    Premier appel validate → emit en 2 minutes.
+  </Card>
+  <Card title="2. Sandbox" icon="flask" href="/sandbox">
+    Clés, endpoints Sources / Pipeline / Réception, playground.
+  </Card>
+  <Card title="3. Sources" icon="plug" href="/guides/sources">
+    PDF, Shopify, Woo — import réel vs simulation API.
+  </Card>
+  <Card title="4. Analyse IA" icon="sparkles" href="/guides/analyse-ia">
+    Heuristique locale vs LLM (Ollama VPS / OpenAI).
+  </Card>
+  <Card title="5. Émission & réception" icon="paper-plane" href="/guides/emission-reception">
+    Déposer vers la PA, inbox fournisseurs.
+  </Card>
+  <Card title="6. Déploiement VPS" icon="server" href="/deploy-vps">
+    Docker : app + Ollama + Postgres + MinIO.
+  </Card>
+</CardGroup>
+
+## Comptes démo app
+
+Mot de passe : `Test1234!` — Login : [http://localhost:8081/login](http://localhost:8081/login)
+
+| Email | Org | Rôle |
+|-------|-----|------|
+| `owner@dupont.fr` | Dupont Conseil | OWNER |
+| `comptable@dupont.fr` | Dupont Conseil | ACCOUNTANT |

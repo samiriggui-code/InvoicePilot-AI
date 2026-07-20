@@ -1,0 +1,186 @@
+/**
+ * Fetch PA brand icons from public logo CDNs (Clearbit → Google favicon → DDG).
+ * Source list: elginux/pa-dataset (DGFiP-verified websites) — Licence Ouverte / MIT dataset.
+ *
+ * Usage: node scripts/fetch-pa-logos.mjs
+ */
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(__dirname, "..");
+const DATASET = path.join(ROOT, "tmp/pa-list/pa-dataset.json");
+const OUT_DIR = path.join(ROOT, "public/media/pa-logos");
+const MANIFEST = path.join(OUT_DIR, "manifest.json");
+const CONCURRENCY = 6;
+
+function slugify(id, name) {
+  const raw = (id || name || "pa")
+    .toString()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 64);
+  return raw || "pa";
+}
+
+function domainFromUrl(website) {
+  try {
+    const u = new URL(website);
+    return u.hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
+function logoCandidates(domain) {
+  return [
+    `https://logo.clearbit.com/${domain}?size=128`,
+    `https://www.google.com/s2/favicons?domain=${domain}&sz=128`,
+    `https://icons.duckduckgo.com/ip3/${domain}.ico`,
+  ];
+}
+
+async function downloadFirst(urls, destBase) {
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, {
+        headers: { "User-Agent": "InvoicePilot-AI-logo-fetch/1.0" },
+        signal: AbortSignal.timeout(15000),
+      });
+      if (!res.ok) continue;
+      const buf = Buffer.from(await res.arrayBuffer());
+      if (buf.length < 80) continue;
+      const ct = (res.headers.get("content-type") || "").toLowerCase();
+      let ext = "png";
+      if (ct.includes("svg")) ext = "svg";
+      else if (ct.includes("webp")) ext = "webp";
+      else if (ct.includes("jpeg") || ct.includes("jpg")) ext = "jpg";
+      else if (ct.includes("ico") || url.endsWith(".ico")) ext = "ico";
+      else if (ct.includes("png")) ext = "png";
+      const dest = `${destBase}.${ext}`;
+      fs.writeFileSync(dest, buf);
+      return { file: path.basename(dest), bytes: buf.length, source: url };
+    } catch {
+      /* try next */
+    }
+  }
+  return null;
+}
+
+async function mapPool(items, limit, fn) {
+  const results = new Array(items.length);
+  let i = 0;
+  async function worker() {
+    while (i < items.length) {
+      const idx = i++;
+      results[idx] = await fn(items[idx], idx);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, () => worker()));
+  return results;
+}
+
+async function main() {
+  if (!fs.existsSync(DATASET)) {
+    console.error("Missing", DATASET, "— download pa-dataset.json first.");
+    process.exit(1);
+  }
+  fs.mkdirSync(OUT_DIR, { recursive: true });
+
+  const data = JSON.parse(fs.readFileSync(DATASET, "utf8"));
+  const platforms = [
+    ...(data.platforms || []),
+    ...(data.platforms_en_attente_tests_interop || []),
+    ...(data.platforms_sc || []),
+  ];
+
+  const seen = new Set();
+  const jobs = [];
+  for (const p of platforms) {
+    const slug = slugify(p.id, p.name);
+    if (seen.has(slug)) continue;
+    seen.add(slug);
+    const domain = domainFromUrl(p.website);
+    if (!domain) continue;
+    jobs.push({
+      slug,
+      name: p.name,
+      website: p.website,
+      domain,
+      status: p.dgfip_status || null,
+    });
+  }
+
+  console.log(`Fetching logos for ${jobs.length} PA…`);
+
+  const results = await mapPool(jobs, CONCURRENCY, async (job) => {
+    const destBase = path.join(OUT_DIR, job.slug);
+    const existing = [".png", ".svg", ".webp", ".jpg", ".ico"]
+      .map((e) => destBase + e)
+      .find((f) => fs.existsSync(f));
+    if (existing) {
+      return {
+        ...job,
+        ok: true,
+        skipped: true,
+        file: path.basename(existing),
+      };
+    }
+    const got = await downloadFirst(logoCandidates(job.domain), destBase);
+    if (!got) {
+      console.warn("FAIL", job.slug, job.domain);
+      return { ...job, ok: false };
+    }
+    console.log("OK", job.slug, got.file, got.bytes);
+    return { ...job, ok: true, file: got.file, source: got.source };
+  });
+
+  const logos = Object.fromEntries(
+    results
+      .filter((r) => r.ok && r.file)
+      .map((r) => [
+        r.slug,
+        {
+          file: r.file,
+          name: r.name,
+          website: r.website,
+          domain: r.domain,
+          status: r.status,
+        },
+      ]),
+  );
+
+  const manifest = {
+    generatedAt: new Date().toISOString(),
+    sourceDataset: "elginux/pa-dataset (DGFiP websites)",
+    attribution:
+      "Logos recovered from public CDN favicons/Clearbit for identification. Brands remain property of their owners. PA list: DGFiP via open datasets.",
+    count: Object.keys(logos).length,
+    failed: results.filter((r) => !r.ok).map((r) => r.slug),
+    logos,
+  };
+
+  fs.writeFileSync(MANIFEST, JSON.stringify(manifest, null, 2));
+
+  const tsLines = [
+    "/** Auto-generated by scripts/fetch-pa-logos.mjs — do not edit by hand. */",
+    "",
+    "export const PA_LOGO_FILES = {",
+  ];
+  for (const slug of Object.keys(logos).sort()) {
+    tsLines.push(`  ${JSON.stringify(slug)}: ${JSON.stringify(logos[slug].file)},`);
+  }
+  tsLines.push("} as const;", "", "export type PaLogoSlug = keyof typeof PA_LOGO_FILES;", "");
+  fs.writeFileSync(path.join(ROOT, "src/lib/pa-logos.generated.ts"), tsLines.join("\n"));
+
+  console.log(`\nDone: ${manifest.count} logos → ${OUT_DIR}\nFailed: ${manifest.failed.length}`);
+}
+
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

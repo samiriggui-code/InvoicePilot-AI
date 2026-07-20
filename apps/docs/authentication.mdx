@@ -1,0 +1,38 @@
+---
+title: Authentication
+description: Comptes dashboard démo + clés API sandbox / live
+---
+
+# Authentication
+
+## Dashboard (session cookie)
+
+| Email | Mot de passe | Usage |
+|-------|--------------|--------|
+| `owner@dupont.fr` | `Test1234!` | Démo PME complète (PA, factures, clients) |
+| `comptable@dupont.fr` | `Test1234!` | Rôle ACCOUNTANT |
+| `collab@dupont.fr` | `Test1234!` | Rôle COLLABORATOR |
+| `jean@martin-freelance.fr` | `Test1234!` | Micro / Starter |
+| `dirigeant@cec-lyon.fr` | `Test1234!` | Cabinet Enterprise |
+
+Reseed si besoin : `npm run db:seed`
+
+## API sandbox
+
+| Header | Valeur |
+|--------|--------|
+| `Authorization` | `Bearer ip_sandbox_demo` |
+| `X-Api-Key` | `ip_sandbox_demo` |
+
+Sans clé → `401`.
+
+## Clés live (tenant)
+
+Depuis **Paramètres → Clés API** : préfixe `ip_live_…` liée à l’`organizationId`.  
+Scopes / quotas selon le plan Stripe.
+
+## Sécurité
+
+- Ne committez jamais une clé live.
+- Webhooks HTTPS uniquement.
+- L’auth API ne remplace pas le contrat avec votre PA.

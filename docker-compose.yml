@@ -1,0 +1,268 @@
+# InvoicePilot AI — stack VPS Hostinger (Traefik + MinIO + Redis + Ollama + backup)
+# Domaines : app / api / @ / www → app · files → MinIO console
+# Déployer depuis /opt/invoicepilot avec .env (voir deploy/README.md)
+name: invoicepilot
+
+networks:
+  invoicepilot:
+    name: invoicepilot
+  gsms:
+    external: true
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  ollama_data:
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: invoicepilot-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    networks:
+      - invoicepilot
+    mem_limit: 512m
+
+  redis:
+    image: redis:7-alpine
+    container_name: invoicepilot-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - invoicepilot
+    mem_limit: 160m
+
+  minio:
+    image: minio/minio:latest
+    container_name: invoicepilot-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BROWSER_REDIRECT_URL: https://files.global-it-ss.com
+    volumes:
+      - minio_data:/data
+    networks:
+      - invoicepilot
+      - gsms
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=gsms
+      - traefik.http.routers.invoicepilot-files.rule=Host(`files.global-it-ss.com`)
+      - traefik.http.routers.invoicepilot-files.entrypoints=websecure
+      - traefik.http.routers.invoicepilot-files.tls.certresolver=letsencrypt
+      - traefik.http.routers.invoicepilot-files.service=invoicepilot-files
+      - traefik.http.services.invoicepilot-files.loadbalancer.server.port=9001
+    mem_limit: 512m
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: invoicepilot-minio-init
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 3;
+      mc alias set local http://minio:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD};
+      mc mb -p local/invoicepilot || true;
+      mc mb -p local/invoicepilot-backups || true;
+      mc anonymous set download local/invoicepilot/public || true;
+      exit 0;
+      "
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    networks:
+      - invoicepilot
+    restart: "no"
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: invoicepilot-ollama
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - invoicepilot
+    mem_limit: 4g
+    cpus: 2.0
+
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: invoicepilot-ollama-init
+    depends_on:
+      - ollama
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      ollama pull qwen2.5:3b || true;
+      exit 0;
+      "
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    networks:
+      - invoicepilot
+    mem_limit: 4g
+    restart: "no"
+
+  docs:
+    image: node:22-bookworm
+    container_name: invoicepilot-docs
+    restart: unless-stopped
+    working_dir: /docs
+    volumes:
+      - ./apps/docs:/docs
+    command:
+      [
+        "sh",
+        "-c",
+        "npx --yes mintlify@latest dev --port 3004 --no-open --host 0.0.0.0",
+      ]
+    networks:
+      - invoicepilot
+      - gsms
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=gsms
+      - traefik.http.routers.invoicepilot-docs.rule=Host(`docs.global-it-ss.com`)
+      - traefik.http.routers.invoicepilot-docs.entrypoints=websecure
+      - traefik.http.routers.invoicepilot-docs.tls.certresolver=letsencrypt
+      - traefik.http.routers.invoicepilot-docs.service=invoicepilot-docs
+      - traefik.http.services.invoicepilot-docs.loadbalancer.server.port=3004
+    mem_limit: 768m
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_DOCS_URL: ${VITE_DOCS_URL:-https://docs.global-it-ss.com}
+    image: invoicepilot-app:latest
+    pull_policy: never
+    container_name: invoicepilot-app
+    restart: unless-stopped
+    ports:
+      - "3010:3010"
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: "3010"
+      HOSTNAME: 0.0.0.0
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@invoicepilot-postgres:5432/${POSTGRES_DB}?schema=public
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      REDIS_URL: redis://invoicepilot-redis:6379
+      STORAGE_ENDPOINT: http://invoicepilot-minio:9000
+      STORAGE_BUCKET: ${STORAGE_BUCKET:-invoicepilot}
+      STORAGE_BACKUP_BUCKET: ${STORAGE_BACKUP_BUCKET:-invoicepilot-backups}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://invoicepilot-ollama:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b}
+      LLM_EXTRACT_ENABLED: ${LLM_EXTRACT_ENABLED:-true}
+      APP_URL: ${APP_URL:-https://app.global-it-ss.com}
+      PUBLIC_URL: ${PUBLIC_URL:-https://global-it-ss.com}
+      DOCS_URL: ${DOCS_URL:-https://docs.global-it-ss.com}
+      VITE_DOCS_URL: ${VITE_DOCS_URL:-https://docs.global-it-ss.com}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_SECURE: ${SMTP_SECURE}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      MAIL_FROM: ${MAIL_FROM}
+      MAIL_CONTACT_TO: ${MAIL_CONTACT_TO}
+      AUTH_SHOW_2FA_CODE: ${AUTH_SHOW_2FA_CODE:-false}
+      CREDENTIALS_SECRET: ${CREDENTIALS_SECRET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      minio:
+        condition: service_started
+      ollama:
+        condition: service_started
+    networks:
+      - invoicepilot
+      - gsms
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=gsms
+      - traefik.http.routers.invoicepilot-app.rule=Host(`app.global-it-ss.com`) || Host(`api.global-it-ss.com`) || Host(`global-it-ss.com`) || Host(`www.global-it-ss.com`)
+      - traefik.http.routers.invoicepilot-app.entrypoints=websecure
+      - traefik.http.routers.invoicepilot-app.tls.certresolver=letsencrypt
+      - traefik.http.routers.invoicepilot-app.priority=20
+      - traefik.http.routers.invoicepilot-app.service=invoicepilot-app
+      - traefik.http.services.invoicepilot-app.loadbalancer.server.port=3010
+    mem_limit: 1536m
+
+  worker:
+    image: invoicepilot-app:latest
+    pull_policy: never
+    container_name: invoicepilot-worker
+    restart: unless-stopped
+    entrypoint: ["node", "deploy/worker.mjs"]
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@invoicepilot-postgres:5432/${POSTGRES_DB}?schema=public
+      REDIS_URL: redis://invoicepilot-redis:6379
+      STORAGE_ENDPOINT: http://invoicepilot-minio:9000
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://invoicepilot-ollama:11434}
+      WORKER_POLL_MS: ${WORKER_POLL_MS:-60000}
+    depends_on:
+      - app
+      - redis
+      - postgres
+    networks:
+      - invoicepilot
+    mem_limit: 256m
+
+  db-backup:
+    image: postgres:16-alpine
+    container_name: invoicepilot-db-backup
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "/backup-loop.sh"]
+    env_file:
+      - .env
+    environment:
+      PGHOST: invoicepilot-postgres
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      STORAGE_ENDPOINT: http://invoicepilot-minio:9000
+      STORAGE_BACKUP_BUCKET: ${STORAGE_BACKUP_BUCKET:-invoicepilot-backups}
+      BACKUP_INTERVAL_SEC: ${BACKUP_INTERVAL_SEC:-86400}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-14}
+    volumes:
+      - ./deploy/backup-loop.sh:/backup-loop.sh:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    networks:
+      - invoicepilot
+    mem_limit: 256m

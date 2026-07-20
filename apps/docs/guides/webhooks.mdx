@@ -1,0 +1,28 @@
+---
+title: Webhooks
+description: Événements invoice.* et webhooks PA (roadmap)
+---
+
+# Webhooks
+
+## Sortants (vers votre app)
+
+`POST /api/v1/webhooks` — URL **HTTPS** requise.
+
+Événements sandbox :
+
+- `invoice.validated`
+- `invoice.blocked`
+- `invoice.ready`
+- `invoice.emitted`
+
+Réponse : `id`, `secret` (`whsec_…`) pour signatures (prod).
+
+## Entrants PA (roadmap)
+
+`POST /api/v1/webhooks/pa/:slug` — la PA notifie InvoicePilot (cycle de vie, inbox).  
+Mapping → `PaLifecycleEvent` / `pipeline_jobs` stage `NOTIFY`.
+
+## Connecteurs sources
+
+Shopify sandbox émet déjà des événements internes `blocked` / `ready` après import.

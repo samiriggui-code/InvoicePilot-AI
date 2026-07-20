@@ -1,0 +1,47 @@
+---
+title: Analyse IA & LLM
+description: Heuristique locale vs Ollama / OpenAI — extraction factures
+---
+
+# Analyse IA & LLM
+
+Module app : **Mon analyse IA**.  
+But : extraire les champs d’une facture source, appliquer les contrôles 2026, verdict **Passé / Bloqué / À analyser**.
+
+## Deux moteurs
+
+| Mode | Quand | Qualité |
+|------|-------|---------|
+| **Heuristique** | Défaut sur PC (Laragon) | Rapide, sans clé API |
+| **LLM** | `LLM_EXTRACT_ENABLED=true` + Ollama ou OpenAI | Meilleure extraction PDF texte |
+
+Les **contrôles réforme** (SIREN, montants, mentions) restent **déterministes** dans les deux cas — l’IA ne « invente » pas la conformité.
+
+## Activer le LLM en local (optionnel)
+
+```env
+LLM_EXTRACT_ENABLED=true
+# Option A — Ollama
+OLLAMA_BASE_URL=http://127.0.0.1:11434
+OLLAMA_MODEL=qwen2.5:3b
+# Option B — OpenAI
+OPENAI_API_KEY=sk-...
+OPENAI_EXTRACT_MODEL=gpt-4o-mini
+```
+
+Sans ces variables : heuristique uniquement (comportement voulu pour le laptop).
+
+## Sur le VPS (préparé)
+
+`docker-compose.yml` inclut déjà :
+
+- service **ollama** + pull `qwen2.5:3b`
+- `OLLAMA_BASE_URL=http://invoicepilot-ollama:11434`
+- `LLM_EXTRACT_ENABLED=true` sur le service **app**
+
+Voir [Déploiement VPS](/deploy-vps).
+
+## Lien produit
+
+Page marketing : [/analyse-ia](http://localhost:8081/analyse-ia)  
+FAQ : [/faq#agent](http://localhost:8081/faq#agent)

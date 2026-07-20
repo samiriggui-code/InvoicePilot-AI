@@ -1,0 +1,1120 @@
+// InvoicePilot AI — schéma PostgreSQL (Lot 0 + modules CDC)
+// Solution compatible : nous ne sommes PAS une plateforme agréée (PA).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Auth & multi-entreprises (Lot 0, Module F3) ─────────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String?  @map("password_hash")
+  name         String?
+  /// Clé avatar Metronic (ex. "300-12") — fichiers /public/media/avatars/
+  avatarKey    String?  @map("avatar_key")
+  emailVerified DateTime? @map("email_verified")
+  twoFactorEnabled Boolean @default(false) @map("two_factor_enabled")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  memberships       OrganizationMember[]
+  invitesSent       OrganizationInvite[] @relation("InviteSender")
+  passwordResets    PasswordResetToken[]
+  twoFactorCodes    TwoFactorCode[]
+  authSessions      AuthSession[]
+  aiConversations   AiConversation[]
+  auditLogs         AuditLog[]
+  notifications     Notification[]
+
+  @@map("users")
+}
+
+model AuthSession {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  tokenHash String   @unique @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("auth_sessions")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  tokenHash String   @unique @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+model TwoFactorCode {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  codeHash  String   @map("code_hash")
+  channel   TwoFactorChannel @default(EMAIL)
+  expiresAt DateTime @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@map("two_factor_codes")
+}
+
+enum TwoFactorChannel {
+  EMAIL
+  SMS
+}
+
+model Organization {
+  id          String   @id @default(cuid())
+  legalName   String   @map("legal_name")
+  tradeName   String?  @map("trade_name")
+  siren       String   @db.VarChar(9)
+  siret       String?  @unique @db.VarChar(14)
+  vatNumber   String?  @map("vat_number")
+  email       String?
+  phone       String?
+
+  addressLine1   String? @map("address_line1")
+  addressLine2   String? @map("address_line2")
+  postalCode     String? @map("postal_code")
+  city           String?
+  countryCode    String  @default("FR") @map("country_code") @db.VarChar(2)
+
+  size        OrganizationSize @default(PME)
+  vatRegime   VatRegime        @default(STANDARD) @map("vat_regime")
+
+  /// Compte seed / sandbox produit — jamais un client réel
+  isDemo      Boolean          @default(false) @map("is_demo")
+
+  complianceScore Decimal? @map("compliance_score") @db.Decimal(5, 2)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  members              OrganizationMember[]
+  invites              OrganizationInvite[]
+  subscription         Subscription?
+  diagnostics          ComplianceDiagnostic[]
+  checklistItems       ComplianceChecklistItem[]
+  counterparties       Counterparty[]
+  invoices             Invoice[]
+  invoiceSequences     InvoiceSequence[]
+  platformConnections  OrganizationPlatformConnection[]
+  merchantIntegrations MerchantIntegration[]
+  eReportingEntries    EReportingEntry[]
+  paymentReports       PaymentReportingEntry[]
+  apiKeys              ApiKey[]
+  webhooks             WebhookEndpoint[]
+  auditLogs            AuditLog[]
+  notifications        Notification[]
+  bridgeProfile        OrganizationBridgeProfile?
+  storageObjects       StorageObject[]
+  pipelineJobs         PipelineJob[]
+  paInboxDocuments     PaInboxDocument[]
+  establishments       OrganizationEstablishment[]
+
+  @@index([siren])
+  @@map("organizations")
+}
+
+/// Établissement (SIRET) de l’organisation — même SIREN, sites d’émission multiples
+model OrganizationEstablishment {
+  id             String  @id @default(cuid())
+  organizationId String  @map("organization_id")
+  siret          String  @db.VarChar(14)
+  label          String?
+  isHeadOffice   Boolean @default(false) @map("is_head_office")
+
+  addressLine1 String? @map("address_line1")
+  addressLine2 String? @map("address_line2")
+  postalCode   String? @map("postal_code")
+  city         String?
+  countryCode  String  @default("FR") @map("country_code") @db.VarChar(2)
+  phone        String?
+  email        String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invoicesAsSeller Invoice[]    @relation("SellerEstablishment")
+
+  @@unique([organizationId, siret])
+  @@index([organizationId])
+  @@map("organization_establishments")
+}
+
+enum OrganizationSize {
+  MICRO
+  PME
+  ETI
+  GE
+}
+
+enum VatRegime {
+  STANDARD
+  FRANCHISE_BASE
+  EXEMPT
+}
+
+model OrganizationMember {
+  id             String     @id @default(cuid())
+  organizationId String     @map("organization_id")
+  userId         String     @map("user_id")
+  role           MemberRole @default(COLLABORATOR)
+  /// Soft-archive (OWNER/ADMIN) — n’a plus accès à l’org tant qu’archivé
+  archivedAt     DateTime?  @map("archived_at")
+  createdAt      DateTime   @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([organizationId])
+  @@index([organizationId, archivedAt])
+  @@map("organization_members")
+}
+
+/// Invitation à rejoindre une org — jamais visible hors de cette org
+model OrganizationInvite {
+  id             String     @id @default(cuid())
+  organizationId String     @map("organization_id")
+  email          String
+  role           MemberRole @default(COLLABORATOR)
+  token          String     @unique
+  invitedById    String     @map("invited_by_id")
+  expiresAt      DateTime   @map("expires_at")
+  acceptedAt     DateTime?  @map("accepted_at")
+  createdAt      DateTime   @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invitedBy    User         @relation("InviteSender", fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, email])
+  @@index([organizationId])
+  @@index([email])
+  @@map("organization_invites")
+}
+
+enum MemberRole {
+  OWNER
+  ADMIN
+  ACCOUNTANT
+  COLLABORATOR
+}
+
+// ─── Abonnements Stripe (Module F1) ──────────────────────────────────────────
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  organizationId       String             @unique @map("organization_id")
+  plan                 SubscriptionPlan
+  status               SubscriptionStatus @default(TRIALING)
+  stripeCustomerId     String?            @unique @map("stripe_customer_id")
+  stripeSubscriptionId String?            @unique @map("stripe_subscription_id")
+  stripePriceId        String?            @map("stripe_price_id")
+  currentPeriodStart   DateTime?          @map("current_period_start")
+  currentPeriodEnd     DateTime?          @map("current_period_end")
+  trialEndsAt          DateTime?          @map("trial_ends_at")
+  canceledAt           DateTime?          @map("canceled_at")
+  createdAt            DateTime           @default(now()) @map("created_at")
+  updatedAt            DateTime           @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+enum SubscriptionPlan {
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+}
+
+// ─── Module A — Diagnostic & checklist ───────────────────────────────────────
+
+model ComplianceDiagnostic {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+
+  companySize      OrganizationSize? @map("company_size")
+  vatRegime        VatRegime?        @map("vat_regime")
+  hasB2bClients    Boolean           @default(true) @map("has_b2b_clients")
+  hasB2cClients    Boolean           @default(false) @map("has_b2c_clients")
+  hasForeignClients Boolean          @default(false) @map("has_foreign_clients")
+  hasPublicSector  Boolean           @default(false) @map("has_public_sector")
+  currentTooling   String?           @map("current_tooling")
+
+  mustReceiveBy       DateTime? @map("must_receive_by")
+  mustEmitBy          DateTime? @map("must_emit_by")
+  needsEInvoicing     Boolean   @default(true) @map("needs_e_invoicing")
+  needsEReportingTx   Boolean   @default(false) @map("needs_e_reporting_tx")
+  needsEReportingPay  Boolean   @default(false) @map("needs_e_reporting_pay")
+
+  completedAt DateTime? @map("completed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("compliance_diagnostics")
+}
+
+model ComplianceChecklistItem {
+  id             String               @id @default(cuid())
+  organizationId String               @map("organization_id")
+  code           String
+  label          String
+  description    String?
+  status         DiagnosticItemStatus @default(PENDING)
+  dueDate        DateTime?            @map("due_date")
+  completedAt    DateTime?            @map("completed_at")
+  sortOrder      Int                  @default(0) @map("sort_order")
+  createdAt      DateTime             @default(now()) @map("created_at")
+  updatedAt      DateTime             @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, code])
+  @@map("compliance_checklist_items")
+}
+
+enum DiagnosticItemStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+  SKIPPED
+}
+
+// ─── Module B — Tiers & factures ─────────────────────────────────────────────
+
+model Counterparty {
+  id             String           @id @default(cuid())
+  organizationId String           @map("organization_id")
+  type           CounterpartyType @default(CLIENT)
+
+  legalName   String  @map("legal_name")
+  siren       String? @db.VarChar(9)
+  siret       String? @db.VarChar(14)
+  vatNumber   String? @map("vat_number")
+  email       String?
+  phone       String?
+
+  billingLine1    String? @map("billing_line1")
+  billingLine2    String? @map("billing_line2")
+  billingPostal   String? @map("billing_postal")
+  billingCity     String? @map("billing_city")
+  billingCountry  String  @default("FR") @map("billing_country") @db.VarChar(2)
+
+  /// Particulier / hors e-invoicing B2B (e-reporting)
+  isConsumer Boolean @default(false) @map("is_consumer")
+  defaultTransactionType TransactionType? @map("default_transaction_type")
+
+  deliveryLine1   String? @map("delivery_line1")
+  deliveryLine2   String? @map("delivery_line2")
+  deliveryPostal  String? @map("delivery_postal")
+  deliveryCity    String? @map("delivery_city")
+  deliveryCountry String? @map("delivery_country") @db.VarChar(2)
+
+  // Cache annuaire Chorus (Module A4)
+  directoryPaName      String?   @map("directory_pa_name")
+  directoryRoutingAddr String?   @map("directory_routing_addr")
+  directorySyncedAt    DateTime? @map("directory_synced_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization   Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invoices       Invoice[]
+  establishments CounterpartyEstablishment[]
+
+  @@index([organizationId, siren])
+  @@map("counterparties")
+}
+
+/// Établissement (SIRET) d’un client — même SIREN, adresses / sites facturés
+model CounterpartyEstablishment {
+  id             String              @id @default(cuid())
+  counterpartyId String              @map("counterparty_id")
+  siret          String              @db.VarChar(14)
+  label          String?
+  isHeadOffice   Boolean             @default(false) @map("is_head_office")
+  source         EstablishmentSource @default(MANUAL)
+
+  addressLine1 String? @map("address_line1")
+  addressLine2 String? @map("address_line2")
+  postalCode   String? @map("postal_code")
+  city         String?
+  countryCode  String  @default("FR") @map("country_code") @db.VarChar(2)
+
+  lastSeenAt DateTime? @map("last_seen_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  counterparty    Counterparty @relation(fields: [counterpartyId], references: [id], onDelete: Cascade)
+  invoicesAsBuyer Invoice[]    @relation("BuyerEstablishment")
+
+  @@unique([counterpartyId, siret])
+  @@index([counterpartyId])
+  @@map("counterparty_establishments")
+}
+
+enum EstablishmentSource {
+  MANUAL
+  ANALYSIS
+  DIRECTORY
+}
+
+enum CounterpartyType {
+  CLIENT
+  SUPPLIER
+  BOTH
+}
+
+/// Séquence inaltérable par organisation (intégrité numérotation — NFR)
+model InvoiceSequence {
+  id             String @id @default(cuid())
+  organizationId String @map("organization_id")
+  prefix         String @default("FAC")
+  nextNumber     Int    @default(1) @map("next_number")
+  padding        Int    @default(4)
+  fiscalYear     Int?   @map("fiscal_year")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, prefix, fiscalYear])
+  @@map("invoice_sequences")
+}
+
+model Invoice {
+  id             String          @id @default(cuid())
+  organizationId String          @map("organization_id")
+  counterpartyId String?         @map("counterparty_id")
+
+  direction InvoiceDirection @default(SALE)
+  type      InvoiceType      @default(INVOICE)
+  status    InvoiceStatus    @default(DRAFT)
+  format    InvoiceFormat?
+
+  number      String?
+  issueDate   DateTime? @map("issue_date") @db.Date
+  serviceDate DateTime? @map("service_date") @db.Date
+  dueDate     DateTime? @map("due_date") @db.Date
+
+  purchaseOrderRef String? @map("purchase_order_ref")
+  currency         String  @default("EUR") @db.VarChar(3)
+
+  /// Origine connecteur (ex. shopify) — Phase 3
+  sourceSystem     String? @map("source_system")
+  sourceExternalId String? @map("source_external_id")
+
+  // Mentions 2026 (Module B2)
+  buyerSiren            String? @map("buyer_siren") @db.VarChar(9)
+  buyerSiret            String? @map("buyer_siret") @db.VarChar(14)
+  sellerEstablishmentId String? @map("seller_establishment_id")
+  buyerEstablishmentId  String? @map("buyer_establishment_id")
+  transactionType       TransactionType    @default(B2B_DOMESTIC) @map("transaction_type")
+  operationCategory     OperationCategory? @map("operation_category")
+  vatOnDebitsOption     Boolean            @default(false) @map("vat_on_debits_option")
+  deliveryDiffers       Boolean            @default(false) @map("delivery_differs")
+
+  // Conditions de paiement (Module B1)
+  paymentTermsDays   Int?     @map("payment_terms_days")
+  earlyPaymentDiscount Decimal? @map("early_payment_discount") @db.Decimal(5, 2)
+  latePenaltyRate    Decimal? @map("late_penalty_rate") @db.Decimal(5, 2)
+  recoveryFeeAmount  Decimal  @default(40) @map("recovery_fee_amount") @db.Decimal(10, 2)
+
+  // Mentions particulières (Module B3)
+  franchiseVatMention Boolean @default(false) @map("franchise_vat_mention")
+  reverseCharge       Boolean @default(false) @map("reverse_charge")
+
+  subtotalHt  Decimal @default(0) @map("subtotal_ht") @db.Decimal(14, 2)
+  totalVat    Decimal @default(0) @map("total_vat") @db.Decimal(14, 2)
+  totalTtc    Decimal @default(0) @map("total_ttc") @db.Decimal(14, 2)
+  discountAmount Decimal @default(0) @map("discount_amount") @db.Decimal(14, 2)
+
+  complianceScore Decimal? @map("compliance_score") @db.Decimal(5, 2)
+
+  // Liens devis / avoir / facture corrigée
+  sourceQuoteId    String? @map("source_quote_id")
+  correctedInvoiceId String? @map("corrected_invoice_id")
+  creditNoteForId  String? @map("credit_note_for_id")
+
+  // Fichiers générés (archivage 10 ans — stockage objet R2/S3)
+  facturxStorageKey String? @map("facturx_storage_key")
+  ublStorageKey     String? @map("ubl_storage_key")
+  pdfStorageKey     String? @map("pdf_storage_key")
+
+  // Transmission PA (Module C) — jamais direct, toujours via PA
+  platformConnectionId String? @map("platform_connection_id")
+  paReference          String? @map("pa_reference")
+  paStatus             PaTransmissionStatus? @map("pa_status")
+  paStatusCode         String?               @map("pa_status_code")
+  paStatusMessage      String?               @map("pa_status_message")
+  lastPaStatusAt       DateTime?             @map("last_pa_status_at")
+  transmittedAt        DateTime? @map("transmitted_at")
+
+  issuedAt  DateTime? @map("issued_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  organization         Organization                  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  counterparty         Counterparty?                 @relation(fields: [counterpartyId], references: [id], onDelete: SetNull)
+  sellerEstablishment  OrganizationEstablishment?    @relation("SellerEstablishment", fields: [sellerEstablishmentId], references: [id], onDelete: SetNull)
+  buyerEstablishment   CounterpartyEstablishment?    @relation("BuyerEstablishment", fields: [buyerEstablishmentId], references: [id], onDelete: SetNull)
+  platformConnection   OrganizationPlatformConnection? @relation(fields: [platformConnectionId], references: [id], onDelete: SetNull)
+  lines                InvoiceLine[]
+  validations          InvoiceValidation[]
+  lifecycleEvents      InvoiceLifecycleEvent[]
+  eReportingEntries    EReportingEntry[]
+  archiveArtifacts     InvoiceArchiveArtifact[]
+  paInboxDocument      PaInboxDocument?
+  extraction           InvoiceExtraction?
+
+  @@unique([organizationId, number])
+  @@index([organizationId, sourceSystem, sourceExternalId])
+  @@index([organizationId, status])
+  @@index([organizationId, issueDate])
+  @@index([organizationId, direction])
+  @@map("invoices")
+}
+
+/// Snapshot d’extraction Analyse IA — conserve le draft complet (pas de perte au re-run partiel)
+model InvoiceExtraction {
+  id        String @id @default(cuid())
+  invoiceId String @unique @map("invoice_id")
+
+  source     String // llm | heuristic | skipped
+  confidence Decimal? @db.Decimal(5, 4)
+
+  /// Draft ExtractedInvoiceDraft sérialisé
+  draftJson Json @map("draft_json")
+
+  sellerSiren     String? @map("seller_siren") @db.VarChar(9)
+  sellerLegalName String? @map("seller_legal_name")
+  buyerSiren      String? @map("buyer_siren") @db.VarChar(9)
+  buyerSiret      String? @map("buyer_siret") @db.VarChar(14)
+  buyerLegalName  String? @map("buyer_legal_name")
+
+  extractedAt DateTime @default(now()) @map("extracted_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@map("invoice_extractions")
+}
+
+enum InvoiceDirection {
+  SALE
+  PURCHASE
+}
+
+enum InvoiceType {
+  QUOTE
+  INVOICE
+  CREDIT_NOTE
+  DEPOSIT
+}
+
+enum InvoiceStatus {
+  DRAFT
+  VALIDATING
+  BLOCKED
+  VALIDATED
+  TRANSMITTING
+  TRANSMITTED
+  RECEIVED
+  REJECTED
+  REFUSED
+  APPROVED
+  PAID
+  ARCHIVED
+}
+
+/// Statut réseau PA (DGFiP / PPF) — distinct du statut métier InvoiceStatus
+enum PaTransmissionStatus {
+  QUEUED
+  SUBMITTED_TO_PA
+  ACCEPTED_BY_PA
+  DELIVERED_TO_BUYER_PA
+  RECEIVED
+  REFUSED
+  REJECTED
+  TECHNICAL_ERROR
+}
+
+enum InvoiceFormat {
+  FACTUR_X
+  UBL
+  CII
+}
+
+enum OperationCategory {
+  GOODS
+  SERVICES
+  MIXED
+}
+
+/// Flux réglementaire : e-invoicing B2B vs e-reporting (B2C / export)
+enum TransactionType {
+  B2B_DOMESTIC
+  B2C
+  EXPORT
+  INTRA_EU
+}
+
+model InvoiceLine {
+  id          String  @id @default(cuid())
+  invoiceId   String  @map("invoice_id")
+  lineNumber  Int     @map("line_number")
+  description String
+  quantity    Decimal @db.Decimal(14, 4)
+  unitPriceHt Decimal @map("unit_price_ht") @db.Decimal(14, 4)
+  vatRate     Decimal @map("vat_rate") @db.Decimal(5, 2)
+  lineTotalHt Decimal @map("line_total_ht") @db.Decimal(14, 2)
+  lineVat     Decimal @map("line_vat") @db.Decimal(14, 2)
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@unique([invoiceId, lineNumber])
+  @@map("invoice_lines")
+}
+
+model InvoiceValidation {
+  id        String             @id @default(cuid())
+  invoiceId String             @map("invoice_id")
+  code      String
+  message   String
+  severity  ValidationSeverity
+  field     String?
+  blocking  Boolean            @default(false)
+  createdAt DateTime           @default(now()) @map("created_at")
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@map("invoice_validations")
+}
+
+enum ValidationSeverity {
+  ERROR
+  WARNING
+  INFO
+}
+
+// ─── Module C — Plateformes agréées & cycle de vie ───────────────────────────
+
+/// Référentiel des PA immatriculées DGFiP (liste officielle)
+model ApprovedPlatform {
+  id              String  @id @default(cuid())
+  slug            String  @unique
+  name            String
+  dgfipReference  String? @map("dgfip_reference")
+  websiteUrl      String? @map("website_url")
+  apiDocsUrl      String? @map("api_docs_url")
+  isActive        Boolean @default(true) @map("is_active")
+  /// Aide au choix (onboarding)
+  pricingHint     PaPricingHint @default(PAID) @map("pricing_hint")
+  audienceHint    PaAudienceHint @default(PME) @map("audience_hint")
+  /// Tags reco : "free", "bank", "accounting", "tpe", "erp"…
+  recommendTags   String[] @default([]) @map("recommend_tags")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  connections OrganizationPlatformConnection[]
+
+  @@map("approved_platforms")
+}
+
+enum PaPricingHint {
+  FREE
+  FREEMIUM
+  PAID
+}
+
+enum PaAudienceHint {
+  TPE
+  PME
+  ENTERPRISE
+  BANK
+  ACCOUNTING
+}
+
+model OrganizationPlatformConnection {
+  id             String                   @id @default(cuid())
+  organizationId String                   @map("organization_id")
+  platformId     String                   @map("platform_id")
+  purpose        PlatformConnectionPurpose @default(BOTH)
+  label          String?
+  credentialsRef String?                  @map("credentials_ref")
+  /** Secrets scellés / env (Qonto OAuth, clés API…) — jamais en clair côté client */
+  metadata       Json?
+  isDefault      Boolean                  @default(false) @map("is_default")
+  isActive       Boolean                  @default(true) @map("is_active")
+  lastSyncAt     DateTime?                @map("last_sync_at")
+  createdAt      DateTime                 @default(now()) @map("created_at")
+  updatedAt      DateTime                 @updatedAt @map("updated_at")
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  platform     ApprovedPlatform @relation(fields: [platformId], references: [id], onDelete: Restrict)
+  invoices          Invoice[]
+  paInboxDocuments  PaInboxDocument[]
+
+  @@index([organizationId])
+  @@map("organization_platform_connections")
+}
+
+enum PlatformConnectionPurpose {
+  EMISSION
+  RECEPTION
+  BOTH
+}
+
+model InvoiceLifecycleEvent {
+  id        String          @id @default(cuid())
+  invoiceId String          @map("invoice_id")
+  status    InvoiceStatus
+  scope     LifecycleScope  @default(EMISSION)
+  source    String          @default("system")
+  message   String?
+  metadata  Json?
+  occurredAt DateTime       @default(now()) @map("occurred_at")
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId, occurredAt])
+  @@map("invoice_lifecycle_events")
+}
+
+enum LifecycleScope {
+  EMISSION
+  RECEPTION
+}
+
+/// Archive documentaire v1 — original corrigé + journal contrôles (conservation)
+model InvoiceArchiveArtifact {
+  id         String             @id @default(cuid())
+  invoiceId  String             @map("invoice_id")
+  kind       InvoiceArchiveKind
+  filename   String
+  mimeType   String             @map("mime_type")
+  content    String             @db.Text
+  storageKey String?            @map("storage_key")
+  createdAt  DateTime           @default(now()) @map("created_at")
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId, kind])
+  @@map("invoice_archive_artifacts")
+}
+
+enum InvoiceArchiveKind {
+  FACTURX_XML
+  VALIDATION_JOURNAL
+  PAYLOAD_SNAPSHOT
+}
+
+// ─── E-reporting (transactions B2C/étranger + paiements) ─────────────────────
+
+model EReportingEntry {
+  id             String          @id @default(cuid())
+  organizationId String          @map("organization_id")
+  invoiceId      String?         @map("invoice_id")
+  volut          ComplianceVolut
+  periodStart    DateTime        @map("period_start") @db.Date
+  periodEnd      DateTime        @map("period_end") @db.Date
+  payload        Json
+  transmittedAt  DateTime?       @map("transmitted_at")
+  paReference    String?         @map("pa_reference")
+  paStatus       PaTransmissionStatus? @map("pa_status")
+  paStatusCode   String?               @map("pa_status_code")
+  paStatusMessage String?              @map("pa_status_message")
+  lastPaStatusAt DateTime?             @map("last_pa_status_at")
+  createdAt      DateTime        @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invoice      Invoice?     @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, periodStart])
+  @@map("e_reporting_entries")
+}
+
+/// Document entrant PA — réception fournisseur (structuré + PDF + métadonnées)
+model PaInboxDocument {
+  id                   String               @id @default(cuid())
+  organizationId       String               @map("organization_id")
+  platformConnectionId String?              @map("platform_connection_id")
+  paReference          String               @map("pa_reference")
+  paStatus             PaTransmissionStatus @default(RECEIVED) @map("pa_status")
+  paStatusCode         String?              @map("pa_status_code")
+  paStatusMessage      String?              @map("pa_status_message")
+  supplierName         String               @map("supplier_name")
+  supplierSiren        String?              @map("supplier_siren") @db.VarChar(9)
+  issueDate            DateTime?            @map("issue_date") @db.Date
+  amountTtc            Decimal              @map("amount_ttc") @db.Decimal(14, 2)
+  currency             String               @default("EUR") @db.VarChar(3)
+  structuredPayload    Json?                @map("structured_payload")
+  pdfStorageKey        String?              @map("pdf_storage_key")
+  facturxStorageKey    String?              @map("facturx_storage_key")
+  invoiceId            String?              @unique @map("invoice_id")
+  receivedAt           DateTime             @default(now()) @map("received_at")
+  lastPaStatusAt       DateTime?            @map("last_pa_status_at")
+  createdAt            DateTime             @default(now()) @map("created_at")
+  updatedAt            DateTime             @updatedAt @map("updated_at")
+
+  organization         Organization                  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  platformConnection   OrganizationPlatformConnection? @relation(fields: [platformConnectionId], references: [id], onDelete: SetNull)
+  invoice              Invoice?                      @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, receivedAt])
+  @@index([organizationId, paReference])
+  @@map("pa_inbox_documents")
+}
+
+model PaymentReportingEntry {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  invoiceId      String?  @map("invoice_id")
+  amountReceived Decimal  @map("amount_received") @db.Decimal(14, 2)
+  receivedAt     DateTime @map("received_at")
+  vatAmount      Decimal? @map("vat_amount") @db.Decimal(14, 2)
+  transmittedAt  DateTime? @map("transmitted_at")
+  paReference    String?  @map("pa_reference")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, receivedAt])
+  @@map("payment_reporting_entries")
+}
+
+enum ComplianceVolut {
+  E_INVOICING
+  E_REPORTING_TRANSACTION
+  E_REPORTING_PAYMENT
+}
+
+// ─── Module D — Agent IA ─────────────────────────────────────────────────────
+
+model AiConversation {
+  id             String   @id @default(cuid())
+  organizationId String?  @map("organization_id")
+  userId         String   @map("user_id")
+  title          String?
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages AiMessage[]
+
+  @@index([userId])
+  @@map("ai_conversations")
+}
+
+model AiMessage {
+  id             String   @id @default(cuid())
+  conversationId String   @map("conversation_id")
+  role           AiRole
+  content        String   @db.Text
+  sources        Json?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  conversation AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@map("ai_messages")
+}
+
+enum AiRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+// ─── Module D — Connecteurs marchands (Phase 3) ──────────────────────────────
+
+enum MerchantProvider {
+  SHOPIFY
+  WOOCOMMERCE
+  WIX
+  PRESTASHOP
+  GENERIC_HTTP
+  MANUAL_UPLOAD
+  API_PUSH
+}
+
+enum MerchantIntegrationStatus {
+  DISCONNECTED
+  CONNECTED
+  SYNCING
+  ERROR
+}
+
+model MerchantIntegration {
+  id             String                    @id @default(cuid())
+  organizationId String                    @map("organization_id")
+  provider       MerchantProvider
+  status         MerchantIntegrationStatus @default(DISCONNECTED)
+  shopDomain     String?                   @map("shop_domain")
+  shopLabel      String?                   @map("shop_label")
+  externalShopId String?                   @map("external_shop_id")
+  lastSyncAt     DateTime?                 @map("last_sync_at")
+  lastError      String?                   @map("last_error")
+  importedCount  Int                       @default(0) @map("imported_count")
+  metadata       Json?
+  createdAt      DateTime                  @default(now()) @map("created_at")
+  updatedAt      DateTime                  @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, provider])
+  @@index([organizationId])
+  @@map("merchant_integrations")
+}
+
+// ─── Module F — API & webhooks ───────────────────────────────────────────────
+
+model ApiKey {
+  id             String    @id @default(cuid())
+  organizationId String    @map("organization_id")
+  name           String
+  keyPrefix      String    @map("key_prefix")
+  keyHash        String    @unique @map("key_hash")
+  lastUsedAt     DateTime? @map("last_used_at")
+  revokedAt      DateTime? @map("revoked_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("api_keys")
+}
+
+model WebhookEndpoint {
+  id             String   @id @default(cuid())
+  organizationId String   @map("organization_id")
+  url            String
+  secretHash     String   @map("secret_hash")
+  events         String[]
+  isActive       Boolean  @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@map("webhook_endpoints")
+}
+
+// ─── Pont — onboarding, storage, centre de tri ───────────────────────────────
+
+/// Qualification inscription : sources + PA + volume + intention plan
+model OrganizationBridgeProfile {
+  id             String @id @default(cuid())
+  organizationId String @unique @map("organization_id")
+
+  hasExistingPa       Boolean @default(false) @map("has_existing_pa")
+  needsPaGuidance     Boolean @default(true) @map("needs_pa_guidance")
+  preferredPlatformSlug String? @map("preferred_platform_slug")
+  paPurpose           PlatformConnectionPurpose @default(BOTH) @map("pa_purpose")
+
+  /// Providers choisis à l’inscription (SHOPIFY, WOOCOMMERCE, MANUAL_UPLOAD…)
+  sourceProviders     String[] @default([]) @map("source_providers")
+  monthlyInvoiceVolume Int?    @map("monthly_invoice_volume")
+
+  intendedPlan        SubscriptionPlan @default(PRO) @map("intended_plan")
+  wantsCheckoutNow    Boolean @default(false) @map("wants_checkout_now")
+
+  onboardingStep      String?  @map("onboarding_step")
+  completedAt         DateTime? @map("completed_at")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("organization_bridge_profiles")
+}
+
+/// Artefacts persistants (centre de tri) — chemin logique + contenu ou clé objet
+model StorageObject {
+  id             String           @id @default(cuid())
+  organizationId String           @map("organization_id")
+  invoiceId      String?          @map("invoice_id")
+  kind           StorageObjectKind
+  storageKey     String           @map("storage_key")
+  filename       String?
+  mimeType       String           @map("mime_type")
+  /// Contenu inline (sandbox) — prod → objet S3/R2 + content null
+  content        String?          @db.Text
+  byteSize       Int              @default(0) @map("byte_size")
+  checksum       String?
+  metadata       Json?
+  createdAt      DateTime         @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, storageKey])
+  @@index([organizationId, kind])
+  @@index([invoiceId])
+  @@map("storage_objects")
+}
+
+enum StorageObjectKind {
+  SOURCE_RAW
+  CANONICAL_JSON
+  FACTURX_XML
+  FACTURX_PDF
+  PA_SUBMIT
+  PA_RESPONSE
+  INBOUND_RAW
+  VALIDATION_JOURNAL
+}
+
+/// File d’étapes du centre de tri (reprise + audit)
+model PipelineJob {
+  id             String              @id @default(cuid())
+  organizationId String              @map("organization_id")
+  invoiceId      String?             @map("invoice_id")
+  direction      PipelineDirection
+  stage          PipelineStage
+  status         PipelineJobStatus   @default(PENDING)
+  attempt        Int                 @default(0)
+  error          String?
+  payload        Json?
+  result         Json?
+  createdAt      DateTime            @default(now()) @map("created_at")
+  updatedAt      DateTime            @updatedAt @map("updated_at")
+  finishedAt     DateTime?           @map("finished_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, status, stage])
+  @@index([invoiceId])
+  @@map("pipeline_jobs")
+}
+
+enum PipelineDirection {
+  INBOUND_SOURCE
+  OUTBOUND_PA
+  INBOUND_PA
+}
+
+enum PipelineStage {
+  INGEST
+  VALIDATE
+  REMEDIATE
+  RENDER
+  SUBMIT
+  RECEIVE
+  ARCHIVE
+  NOTIFY
+}
+
+enum PipelineJobStatus {
+  PENDING
+  RUNNING
+  SUCCEEDED
+  FAILED
+}
+
+// ─── Sécurité & audit (NFR) ──────────────────────────────────────────────────
+
+model AuditLog {
+  id             String   @id @default(cuid())
+  organizationId String?  @map("organization_id")
+  userId         String?  @map("user_id")
+  action         String
+  entityType     String?  @map("entity_type")
+  entityId       String?  @map("entity_id")
+  metadata       Json?
+  ipAddress      String?  @map("ip_address")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  user         User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@map("audit_logs")
+}
+
+// ─── Notifications in-app + contact ──────────────────────────────────────────
+
+enum NotificationSeverity {
+  INFO
+  SUCCESS
+  WARNING
+  ALERT
+}
+
+enum NotificationCategory {
+  SYSTEM
+  BILLING
+  COMPLIANCE
+  INVOICE
+  TEAM
+  PA
+  SECURITY
+}
+
+model Notification {
+  id             String               @id @default(cuid())
+  userId         String               @map("user_id")
+  organizationId String?              @map("organization_id")
+  title          String
+  body           String
+  severity       NotificationSeverity @default(INFO)
+  category       NotificationCategory @default(SYSTEM)
+  href           String?
+  readAt         DateTime?            @map("read_at")
+  createdAt      DateTime             @default(now()) @map("created_at")
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt, createdAt])
+  @@index([userId, severity, readAt])
+  @@index([organizationId, createdAt])
+  @@map("notifications")
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  /// IP / user-agent optionnels
+  meta      Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@map("contact_messages")
+}

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Pennylane">
+  <title>Pennylane</title>
+  <rect width="48" height="48" rx="12" fill="#5B4CDB"/>
+  <path fill="#FFFFFF" d="M14 12h12.5c6.2 0 10.5 3.6 10.5 9.2 0 5.7-4.3 9.3-10.5 9.3H20.8V36h-6.8V12zm6.8 5.4v8.7h5.2c3.1 0 5-1.7 5-4.35s-1.9-4.35-5-4.35H20.8z"/>
+</svg>

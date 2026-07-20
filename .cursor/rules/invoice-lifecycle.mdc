@@ -1,0 +1,14 @@
+---
+description: Cycle de vie facture e-facture — immutabilité post-PA, anti-doublons
+globs: src/fns/**/*.ts,src/components/sources/**/*.tsx,src/lib/invoice-lifecycle-rules.ts,src/lib/counterparty-dedupe.ts
+alwaysApply: true
+---
+
+# Cycle de vie facture — règles légales
+
+1. **Avant envoi PA** (Sources) : éditer, supprimer, remplacer, relancer Analyse IA, corriger.
+2. **Après envoi réseau PA** (`TRANSMITTING` / `TRANSMITTED` / `PAID` / `APPROVED` / `RECEIVED`) : **verrouillé**. Pas de retour arrière. Correction = avoir (credit note), jamais réécriture du document déposé.
+3. Helpers : `isInvoiceImmutable` / `canMutateSourceInvoice` dans `src/lib/invoice-lifecycle-rules.ts` — les utiliser partout (Sources, analyse, delete).
+4. **Anti-doublon factures** : un même PDF / `sourceExternalId` ne doit pas créer 2 factures. Signaler le skip clairement.
+5. **Anti-doublon clients** : même SIREN (ou même raison sociale) → `findOrCreateClient` (`src/lib/counterparty-dedupe.ts`), jamais 2 fiches.
+6. **Émetteur = org (ventes)** : SALE / Sources / Émission → SIREN émetteur = SIREN org (`validateSellerMatchesOrganization`). Plusieurs SIRET OK. SIREN ≠ org → bloquer (autre entreprise → Réception / achat). Nom émetteur divergent → warning.

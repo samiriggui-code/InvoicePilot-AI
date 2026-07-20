@@ -1,0 +1,852 @@
+{
+  "version": "1.1",
+  "generated_at": "2026-04-26",
+  "source_count": 127,
+  "_metadata": {
+    "total_count_pa_immatriculees": 127,
+    "total_count_pa_en_attente": 19,
+    "total_count_sc": 3,
+    "last_dgfip_check": "2026-04-26",
+    "completion_breakdown": {
+      "full": 7,
+      "partial": 0,
+      "minimal": 120,
+      "sc_full": 3,
+      "en_attente_minimal": 19
+    },
+    "notes_completion": "Snapshot 26 avril 2026. Les 7 PA marquées 'full' sont enrichies (Indy, Pennylane, Tiime, Sellsy, Sage, Cegid, Quadient-Serensia). Les 120 autres PA immatriculées DGFiP sont en complétion 'minimal' : nom + raison sociale (quand disponible) + adresse + URL site web + email contact + statut DGFiP — sourcés directement sur impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees, mise à jour DGFiP 24 avril 2026, vérifiés Elginux 26 avril 2026. Champs riches (statuses_supported, sectors_supported, tva, integrations, pricing, strengths, weaknesses) intentionnellement omis sur les fiches 'minimal' : ne pas fabriquer de données. Pipeline d'enrichissement progressif prévu (cf. recommandations ci-dessous). Les 19 en attente des tests d'interopérabilité ont aussi un statut 'minimal'. 3 Solutions Compatibles (EBP, Henrri, Freebe) sont conservées dans 'platforms_sc' pour informer l'utilisateur sur la dépendance à une PA tierce."
+  },
+  "schema_notes": {
+    "dgfip_status_values": [
+      "PA immatriculée",
+      "PA en attente d'immatriculation",
+      "SC (Solution Compatible)"
+    ],
+    "completion_levels": {
+      "full": "Toutes sections renseignées (pricing, statuses_supported, sectors_supported, tva, support, integrations, strengths, weaknesses, notes éditoriales). Vérifié sur site éditeur + DGFiP.",
+      "partial": "Champs essentiels (id, name, url, target_personas, pricing approximatif). Pas de strengths/weaknesses détaillés.",
+      "minimal": "Identité officielle DGFiP uniquement (nom, raison sociale si dispo, adresse, URL, email, statut DGFiP, date d'agrément si dispo). Champs riches volontairement omis pour ne pas fabriquer de données. Le consommateur (UI ConformiCheck/FactureDirectory) doit afficher 'Fiche en cours de complétion' sur ces PA."
+    },
+    "relay_pa_field": "Renseigné uniquement pour les SC : nom de la PA via laquelle la solution transmet les factures.",
+    "profile_tags_reference": "Tags issus de apps/conformicheck/docs/01-product-spec-v05.md §2.4."
+  },
+  "methodology": "Données collectées au 26 avril 2026 par recherche directe sur la liste officielle DGFiP (impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees, dernière mise à jour DGFiP 24 avril 2026). Source primaire = site impots.gouv.fr (nom commercial + adresse + URL site + email contact + date d'agrément). Pour les 7 PA enrichies en 'full', sources secondaires = sites éditeurs des PA (tarifs, support, fonctionnalités). Les Solutions Compatibles (SC) ne sont PAS des Plateformes Agréées : elles s'interfacent avec une PA pour transmettre les factures. ConformiCheck distingue les deux pour informer l'utilisateur d'un éventuel coût implicite ou d'une dépendance à un tiers. Toute donnée non vérifiable au 26/04/2026 est marquée [à vérifier] ou omise.",
+  "platforms": [
+    {
+      "id": "indy",
+      "name": "Indy",
+      "legal_name": "Indy SAS",
+      "website": "https://www.indy.fr",
+      "dgfip_status": "PA immatriculée",
+      "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees",
+      "dgfip_status_verified_at": "2026-04-26",
+      "relay_pa": null,
+      "headquarters": "Lyon, France",
+      "address": "94 Rue Robert, 69006 Lyon",
+      "contact_email": "pdp@indy.fr",
+      "pricing": {
+        "has_free_tier": true,
+        "free_tier_label": "Essentiel",
+        "tiers": [
+          { "name": "Essentiel", "price_month_ht_eur": 0, "target": "auto-entrepreneurs, EI, SCI, LMNP, SAS/SASU (toutes formes)" },
+          { "name": "Plus", "price_month_ht_eur": 9, "target": "facturation avancée, 3 sous-comptes" },
+          { "name": "Premium Auto-entrepreneur / EI", "price_month_ht_eur": 12, "target": "déclarations TVA, gestion seuils micro" },
+          { "name": "Premium SCI / LMNP", "price_month_ht_eur": 24, "target": "SCI à l'IR, LMNP" },
+          { "name": "Premium Société (SASU/EURL)", "price_month_ht_eur": 49, "target": "sociétés unipersonnelles" }
+        ],
+        "source": "https://www.indy.fr/tarifs/",
+        "verified_at": "2026-04-25"
+      },
+      "statuses_supported": ["micro", "ei_ir", "unipersonnelle", "sci", "lmnp"],
+      "statuses_not_supported_or_weak": ["sas_sarl_tpe", "asso"],
+      "sectors_supported": ["b2b_services", "liberale_autre", "liberale_reglementee", "sante"],
+      "sectors_weak": ["btp", "retail", "hcr"],
+      "volumes_supported": ["vol_0", "vol_micro", "vol_petit", "vol_moyen"],
+      "tva": {
+        "franchise": true,
+        "autoliq_btp": "[à vérifier]",
+        "marge": "[à vérifier]",
+        "exoneration_sante": true,
+        "intracom": true,
+        "standard": true
+      },
+      "support": {
+        "phone": false,
+        "chat": true,
+        "email": true,
+        "faq": true,
+        "sla_hours_estimated": 24
+      },
+      "integrations": ["qonto", "stripe", "shine", "boursorama_pro", "revolut_business"],
+      "formats": ["factur-x", "ubl"],
+      "ttm_setup_days": 1,
+      "strengths": [
+        "Plan gratuit (Essentiel) disponible pour toute forme juridique",
+        "Tarifs croissants par complexité juridique (12€ micro, 24€ SCI/LMNP, 49€ société)",
+        "Spécialiste micro-entrepreneurs et SCI/LMNP",
+        "Intégrations bancaires natives (Qonto, Shine, Boursorama Pro)"
+      ],
+      "weaknesses": [
+        "Pas de support téléphonique direct (chat et email uniquement)",
+        "Couverture autoliquidation BTP non documentée publiquement [à vérifier]",
+        "Pas de plan dédié SAS/SARL multi-salariés au tarif documenté"
+      ],
+      "sources": [
+        { "label": "Site officiel Indy — Tarifs", "url": "https://www.indy.fr/tarifs/", "consulted_at": "2026-04-25" },
+        { "label": "Liste DGFiP des plateformes agréées", "url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "consulted_at": "2026-04-26" }
+      ],
+      "notes": "Indy lève 86M€ et revendique ~200k clients micro-entrepreneurs (chiffre presse 2024-2025, [à vérifier] pour 2026). PA immatriculée vérifiée sur liste DGFiP au 26/04/2026.",
+      "last_verified": "2026-04-26",
+      "_metadata": { "completion_level": "full" }
+    },
+    {
+      "id": "pennylane",
+      "name": "Pennylane",
+      "legal_name": "Pennylane SAS",
+      "website": "https://www.pennylane.com/fr/",
+      "dgfip_status": "PA immatriculée",
+      "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees",
+      "dgfip_status_verified_at": "2026-04-26",
+      "relay_pa": null,
+      "headquarters": "Paris, France",
+      "address": "2-4 Rue Jules Lefebvre, 75009 Paris",
+      "contact_email": "portabilite.pa@pennylane.com",
+      "pricing": {
+        "has_free_tier": false,
+        "free_tier_label": null,
+        "tiers": [
+          { "name": "Basique", "price_month_ht_eur": 14, "target": "indépendants, micro-entreprises" },
+          { "name": "Essentiel", "price_month_ht_eur": 24, "target": "TPE/PME en croissance, plan le plus populaire" },
+          { "name": "Premium", "price_month_ht_eur": 79, "target": "profils orientés comptabilité complète" }
+        ],
+        "source": "https://www.pennylane.com/fr/tarifs/",
+        "verified_at": "2026-04-25",
+        "notes": "Tarifs HT/mois pour 1 utilisateur. Jusqu'à 1200 factures/an. Essai gratuit 15 jours."
+      },
+      "statuses_supported": ["micro", "ei_ir", "unipersonnelle", "sas_sarl_tpe", "sci"],
+      "statuses_not_supported_or_weak": ["lmnp", "asso"],
+      "sectors_supported": ["b2b_services", "retail", "industrie", "liberale_autre"],
+      "sectors_weak": ["sante", "hcr"],
+      "volumes_supported": ["vol_micro", "vol_petit", "vol_moyen", "vol_eleve"],
+      "tva": {
+        "franchise": true,
+        "autoliq_btp": "[à vérifier]",
+        "marge": "[à vérifier]",
+        "exoneration_sante": "[à vérifier]",
+        "intracom": true,
+        "standard": true
+      },
+      "support": {
+        "phone": "[à vérifier]",
+        "chat": true,
+        "email": true,
+        "faq": true,
+        "sla_hours_estimated": 24
+      },
+      "integrations": ["stripe", "qonto", "shine", "shopify", "woocommerce"],
+      "formats": ["factur-x", "ubl"],
+      "ttm_setup_days": 3,
+      "strengths": [
+        "Comptabilité complète intégrée (collaboration expert-comptable)",
+        "Public TPE/PME large (micro à SAS multi-salariés)",
+        "E-invoicing inclus sans surcoût dans tous les plans",
+        "Sert aussi de PA relais pour Henrri (Solution Compatible)"
+      ],
+      "weaknesses": [
+        "Pas de plan gratuit",
+        "Disponibilité support téléphonique non documentée publiquement [à vérifier]",
+        "Tarif Premium 79€/mois HT (positionnement haut de gamme)"
+      ],
+      "sources": [
+        { "label": "Pennylane — Tarifs", "url": "https://www.pennylane.com/fr/tarifs/", "consulted_at": "2026-04-25" },
+        { "label": "Liste DGFiP", "url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "consulted_at": "2026-04-26" }
+      ],
+      "notes": "~100k clients revendiqués (presse 2024-2025, [à vérifier] pour 2026). PA immatriculée DGFiP, sert de relais pour Henrri.",
+      "last_verified": "2026-04-26",
+      "_metadata": { "completion_level": "full" }
+    },
+    {
+      "id": "tiime",
+      "name": "Tiime",
+      "legal_name": "Tiime SAS",
+      "website": "https://www.tiime.fr",
+      "dgfip_status": "PA immatriculée",
+      "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees",
+      "dgfip_status_verified_at": "2026-04-26",
+      "relay_pa": null,
+      "headquarters": "Paris, France",
+      "address": "15 Rue Auber, 75009 Paris",
+      "contact_email": "contact@tiimepdp.com",
+      "pricing": {
+        "has_free_tier": true,
+        "free_tier_label": "Free",
+        "tiers": [
+          { "name": "Free", "price_month_ht_eur": 0, "target": "freelances, solo entrepreneurs (illimité dans le temps)" },
+          { "name": "Smart", "price_month_ht_eur_min": 17.99, "price_month_ht_eur_max": 49.99, "target": "TPE 0-5 salariés, prix selon taille" },
+          { "name": "Business", "price_month_ht_eur_min": 24.99, "price_month_ht_eur_max": 65.99, "target": "PME 2-20+ salariés, prix selon taille" }
+        ],
+        "source": "https://www.tiime.fr/tarifs",
+        "verified_at": "2026-04-25",
+        "notes": "Page consultée le 25/04/2026 affiche grille tarifaire avec branding 2025. Tarifs susceptibles d'évolution [à vérifier] mi-2026."
+      },
+      "statuses_supported": ["micro", "ei_ir", "unipersonnelle", "sas_sarl_tpe"],
+      "statuses_not_supported_or_weak": ["sci", "lmnp", "asso"],
+      "sectors_supported": ["b2b_services", "liberale_autre"],
+      "sectors_weak": ["btp", "retail", "hcr", "sante"],
+      "volumes_supported": ["vol_micro", "vol_petit", "vol_moyen"],
+      "tva": {
+        "franchise": true,
+        "autoliq_btp": "[à vérifier]",
+        "marge": "[à vérifier]",
+        "exoneration_sante": "[à vérifier]",
+        "intracom": "[à vérifier]",
+        "standard": true
+      },
+      "support": {
+        "phone": true,
+        "chat": true,
+        "email": true,
+        "faq": true,
+        "sla_hours_estimated": 1
+      },
+      "integrations": ["qonto", "stripe", "shine"],
+      "formats": ["factur-x", "ubl"],
+      "ttm_setup_days": 1,
+      "strengths": [
+        "Plan Free 100% gratuit pour freelances (illimité dans le temps, pas de limite factures)",
+        "Support client multicanal France (téléphone + chat + email, SLA 1h)",
+        "Partenariat actif réseaux experts-comptables",
+        "Setup rapide (<1 jour)"
+      ],
+      "weaknesses": [
+        "Couverture limitée pour SCI/LMNP non confirmée publiquement [à vérifier]",
+        "Régimes TVA spécifiques (autoliq BTP, marge, exo santé) non documentés sur tarifs publics [à vérifier]",
+        "Plans Smart/Business à fourchette large : devis nécessaire pour tarif final"
+      ],
+      "sources": [
+        { "label": "Tiime — Tarifs", "url": "https://www.tiime.fr/tarifs", "consulted_at": "2026-04-25" },
+        { "label": "Liste DGFiP", "url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "consulted_at": "2026-04-26" }
+      ],
+      "notes": "PA immatriculée DGFiP (raison sociale 'TIIME PDP' sur liste officielle). Tiime se positionne comme PA freelance + lien expert-comptable.",
+      "last_verified": "2026-04-26",
+      "_metadata": { "completion_level": "full" }
+    },
+    {
+      "id": "sellsy",
+      "name": "Sellsy",
+      "legal_name": "Sellsy SAS",
+      "website": "https://go.sellsy.com",
+      "dgfip_status": "PA immatriculée",
+      "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees",
+      "dgfip_status_verified_at": "2026-04-26",
+      "relay_pa": null,
+      "headquarters": "La Rochelle, France",
+      "address": "Avenue du Lazaret, 17000 La Rochelle",
+      "contact_email": "contact@sellsy.com",
+      "pricing": {
+        "has_free_tier": false,
+        "free_tier_label": null,
+        "tiers": [
+          { "name": "Module Facturation Standard", "price_month_ht_eur": 39, "target": "TPE — 1 utilisateur min, facturation seule, engagement annuel" },
+          { "name": "Module Facturation Evolution", "price_month_ht_eur": 59, "target": "TPE/PME — facturation + support phone, engagement annuel" },
+          { "name": "Module Facturation Elite", "price_month_ht_eur": 79, "target": "PME — facturation + automatisation, engagement annuel" },
+          { "name": "CRM + Facturation Standard", "price_month_ht_eur": 49, "target": "TPE — CRM complet, 2 utilisateurs minimum, engagement annuel" },
+          { "name": "CRM + Facturation Evolution", "price_month_ht_eur": 89, "target": "PME — plan le plus populaire, engagement annuel" },
+          { "name": "CRM + Facturation Elite", "price_month_ht_eur": 119, "target": "PME — support phone inclus, engagement annuel" }
+        ],
+        "source": "https://go.sellsy.com/en/offers",
+        "verified_at": "2026-04-25",
+        "notes": "Tarifs HT par utilisateur par mois en engagement annuel. Mensuel sans engagement +20-30%. CRM complet exige 2 utilisateurs minimum."
+      },
+      "statuses_supported": ["unipersonnelle", "sas_sarl_tpe"],
+      "statuses_not_supported_or_weak": ["micro", "ei_ir", "sci", "lmnp", "asso"],
+      "sectors_supported": ["b2b_services", "retail", "industrie"],
+      "sectors_weak": ["sante", "btp", "hcr"],
+      "volumes_supported": ["vol_petit", "vol_moyen", "vol_eleve", "vol_massif"],
+      "tva": {
+        "franchise": "[à vérifier]",
+        "autoliq_btp": "[à vérifier]",
+        "marge": "[à vérifier]",
+        "exoneration_sante": "[à vérifier]",
+        "intracom": true,
+        "standard": true
+      },
+      "support": {
+        "phone": true,
+        "phone_tier_required": "Module Facturation Evolution+ ou CRM Elite",
+        "chat": true,
+        "email": true,
+        "faq": true,
+        "sla_hours_estimated": 24
+      },
+      "integrations": ["stripe", "qonto", "shopify", "woocommerce", "hubspot", "mailchimp"],
+      "formats": ["factur-x", "ubl"],
+      "ttm_setup_days": 7,
+      "strengths": [
+        "CRM + facturation intégrés (couverture commerciale étendue)",
+        "Support téléphone à partir de 59€/mois (Evolution Module ou Elite CRM)",
+        "Intégrations e-commerce natives (Shopify, WooCommerce)",
+        "PA immatriculée DGFiP, hébergement France"
+      ],
+      "weaknesses": [
+        "Pas de plan gratuit",
+        "Ticket d'entrée 39€/mois HT module Facturation seul",
+        "CRM complet impose 2 utilisateurs minimum (98€/mois HT minimum)",
+        "Couverture régimes TVA spéciaux non publiée publiquement [à vérifier]"
+      ],
+      "sources": [
+        { "label": "Sellsy — Offres", "url": "https://go.sellsy.com/en/offers", "consulted_at": "2026-04-25" },
+        { "label": "Liste DGFiP", "url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "consulted_at": "2026-04-26" }
+      ],
+      "notes": "Sellsy positionnée TPE/PME avec composante CRM. PA immatriculée DGFiP.",
+      "last_verified": "2026-04-26",
+      "_metadata": { "completion_level": "full" }
+    },
+    {
+      "id": "sage",
+      "name": "Sage",
+      "legal_name": "Sage France SAS",
+      "website": "https://www.sage.com/fr-fr/",
+      "dgfip_status": "PA immatriculée",
+      "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees",
+      "dgfip_status_verified_at": "2026-04-26",
+      "relay_pa": null,
+      "headquarters": "Paris, France (groupe UK)",
+      "address": "10 Place de Belgique, 92250 La Garenne-Colombes",
+      "contact_email": "pdp.france@sage.com",
+      "pricing": {
+        "has_free_tier": false,
+        "free_tier_label": null,
+        "tiers": [
+          { "name": "Sage Active", "price_month_ht_eur": 25, "target": "TPE 2-20 salariés (facturation + comptabilité)" },
+          { "name": "Sage Business Cloud Facturation", "price_month_ht_eur": 25, "target": "TPE — module facturation, sans engagement, -25% les 3 premiers mois" },
+          { "name": "Sage 50", "price_month_ht_eur": "[à vérifier]", "target": "TPE/PME — 6000 flux factures/an inclus" },
+          { "name": "Sage 100", "price_month_ht_eur": "[à vérifier]", "target": "PME/ETI — gestion intégrée multi-établissements" }
+        ],
+        "source": "https://www.sage.com/fr-fr/dematerialisation/facture-electronique/logiciels/",
+        "verified_at": "2026-04-25",
+        "notes": "Sage 50 et Sage 100 nécessitent devis (tarifs non publics). Sage Active et Sage Business Cloud Facturation tarifés publiquement à 25€ HT/mois."
+      },
+      "statuses_supported": ["unipersonnelle", "sas_sarl_tpe", "asso"],
+      "statuses_not_supported_or_weak": ["micro", "lmnp"],
+      "sectors_supported": ["b2b_services", "retail", "industrie", "btp", "transport"],
+      "sectors_weak": ["sante", "liberale_reglementee"],
+      "volumes_supported": ["vol_moyen", "vol_eleve", "vol_massif"],
+      "tva": {
+        "franchise": "[à vérifier]",
+        "autoliq_btp": true,
+        "marge": "[à vérifier]",
+        "exoneration_sante": "[à vérifier]",
+        "intracom": true,
+        "standard": true
+      },
+      "support": {
+        "phone": true,
+        "chat": true,
+        "email": true,
+        "faq": true,
+        "sla_hours_estimated": 24
+      },
+      "integrations": ["sage_paie", "sage_immobilisations", "stripe", "principales_banques_fr"],
+      "formats": ["factur-x", "ubl", "cii"],
+      "ttm_setup_days": 14,
+      "strengths": [
+        "ERP comptable historique (40+ ans en France)",
+        "Support phone disponible (réseau partenaires + service direct)",
+        "PA immatriculée DGFiP — pas de surcoût flux factures (Sage 50 : 6000 flux/an inclus)",
+        "Couverture sectorielle large (BTP, industrie, transport)"
+      ],
+      "weaknesses": [
+        "Pas adapté micro-entrepreneur (positionnement TPE/PME structurées minimum)",
+        "Sage 50 et Sage 100 sans tarifs publics (devis obligatoire)",
+        "Setup typique 10-14 jours",
+        "Interface ERP historique (pas refonte UX récente documentée)"
+      ],
+      "sources": [
+        { "label": "Sage — Logiciels facture électronique", "url": "https://www.sage.com/fr-fr/dematerialisation/facture-electronique/logiciels/", "consulted_at": "2026-04-25" },
+        { "label": "Liste DGFiP", "url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "consulted_at": "2026-04-26" }
+      ],
+      "notes": "Sage est PA immatriculée DGFiP. Plusieurs gammes (Active, Business Cloud, 50, 100) avec positionnements différents.",
+      "last_verified": "2026-04-26",
+      "_metadata": { "completion_level": "full" }
+    },
+    {
+      "id": "cegid",
+      "name": "Cegid",
+      "legal_name": "Cegid SAS",
+      "website": "https://www.cegid.com/fr/",
+      "dgfip_status": "PA immatriculée",
+      "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees",
+      "dgfip_status_verified_at": "2026-04-26",
+      "relay_pa": null,
+      "headquarters": "Lyon, France",
+      "address": "52 Quai Paul Sédallian, 69279 Lyon Cedex 09",
+      "contact_email": "contact-pa@cegid.com",
+      "pricing": {
+        "has_free_tier": false,
+        "free_tier_label": null,
+        "tiers": [
+          { "name": "Cegid Loop (entreprise)", "price_month_ht_eur_min": 100, "price_month_ht_eur_max": "[à vérifier]", "target": "TPE/PME — comptabilité, devis sur mesure, à partir de 100€/mois pour 1 dossier" },
+          { "name": "Cegid Loop (cabinet EC)", "price_month_ht_eur": "[à vérifier]", "target": "Cabinets experts-comptables, devis selon nombre de dossiers" },
+          { "name": "Cegid Quadra", "price_month_ht_eur": "[à vérifier]", "target": "PME/ETI — gamme historique" }
+        ],
+        "source": "https://www.cegid.com/fr/produits/cegid-loop/",
+        "verified_at": "2026-04-25",
+        "notes": "Cegid n'affiche pas de tarifs publics. Estimation 100€/mois minimum pour entreprise (source : saasforge.fr 2026). Devis commercial obligatoire."
+      },
+      "statuses_supported": ["unipersonnelle", "sas_sarl_tpe", "asso"],
+      "statuses_not_supported_or_weak": ["micro", "ei_ir", "sci", "lmnp"],
+      "sectors_supported": ["b2b_services", "retail", "industrie", "btp", "transport", "sante"],
+      "sectors_weak": ["liberale_autre"],
+      "volumes_supported": ["vol_moyen", "vol_eleve", "vol_massif"],
+      "tva": {
+        "franchise": "[à vérifier]",
+        "autoliq_btp": true,
+        "marge": "[à vérifier]",
+        "exoneration_sante": true,
+        "intracom": true,
+        "standard": true
+      },
+      "support": {
+        "phone": true,
+        "chat": true,
+        "email": true,
+        "faq": true,
+        "sla_hours_estimated": 24
+      },
+      "integrations": ["cegid_paie", "ebp", "principales_banques_fr", "stripe"],
+      "formats": ["factur-x", "ubl", "cii"],
+      "ttm_setup_days": 21,
+      "strengths": [
+        "ERP français historique avec 20+ moteurs IA intégrés (chaîne comptable automatisée)",
+        "PA immatriculée DGFiP intégrée nativement",
+        "Forte présence cabinets experts-comptables (relais distribution)",
+        "EBP appartient au groupe Cegid (intégration native)"
+      ],
+      "weaknesses": [
+        "Tarifs non publics (devis obligatoire)",
+        "Cegid Loop principalement orientée cabinets experts-comptables, pas TPE en direct",
+        "Ticket d'entrée à partir de 100€/mois HT (pas adapté micro-entrepreneurs / petits indépendants)",
+        "Setup long (~3 semaines typique)"
+      ],
+      "sources": [
+        { "label": "Cegid Loop", "url": "https://www.cegid.com/fr/produits/cegid-loop/", "consulted_at": "2026-04-25" },
+        { "label": "Liste DGFiP", "url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "consulted_at": "2026-04-26" },
+        { "label": "Tarif estimé Cegid Loop", "url": "https://saasforge.fr/tarifs/cegid-pdp", "consulted_at": "2026-04-25" }
+      ],
+      "notes": "Cegid PA immatriculée DGFiP. Sert de PA relais pour la gamme EBP (groupe Cegid).",
+      "last_verified": "2026-04-26",
+      "_metadata": { "completion_level": "full" }
+    },
+    {
+      "id": "quadient-serensia",
+      "name": "Serensia by Quadient",
+      "legal_name": "Quadient France SAS (Serensia rachetée 2025)",
+      "website": "https://serensia.com",
+      "dgfip_status": "PA immatriculée",
+      "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees",
+      "dgfip_status_verified_at": "2026-04-26",
+      "relay_pa": null,
+      "headquarters": "Paris, France",
+      "address": "15 Rue des Mathurins, 75009 Paris",
+      "contact_email": "contact.marketing@quadient.com",
+      "pricing": {
+        "has_free_tier": false,
+        "free_tier_label": null,
+        "tiers": [
+          { "name": "Serensia Enterprise", "price_month_ht_eur": "[à vérifier]", "target": "ETI, grandes entreprises, groupes (TotalEnergies, Engie, Orange, BPCE référencés)" },
+          { "name": "Serensia PME/ETI", "price_month_ht_eur": "[à vérifier]", "target": "PME mid-market — devis sur volume factures" }
+        ],
+        "source": "https://serensia.com/",
+        "verified_at": "2026-04-25",
+        "notes": "Tarifs non publics — modèle B2B grandes structures avec devis personnalisés selon volumes (215M+ factures/an annoncées sur la plateforme dès 2026)."
+      },
+      "statuses_supported": ["sas_sarl_tpe", "asso"],
+      "statuses_not_supported_or_weak": ["micro", "ei_ir", "unipersonnelle", "sci", "lmnp"],
+      "sectors_supported": ["industrie", "retail", "transport", "b2b_services", "btp"],
+      "sectors_weak": ["sante", "liberale_autre", "liberale_reglementee", "hcr"],
+      "volumes_supported": ["vol_eleve", "vol_massif"],
+      "tva": {
+        "franchise": "[à vérifier]",
+        "autoliq_btp": true,
+        "marge": "[à vérifier]",
+        "exoneration_sante": "[à vérifier]",
+        "intracom": true,
+        "standard": true
+      },
+      "support": {
+        "phone": true,
+        "chat": "[à vérifier]",
+        "email": true,
+        "faq": true,
+        "sla_hours_estimated": 24
+      },
+      "integrations": ["sap", "oracle", "microsoft_dynamics", "ebp", "cegid", "principales_erp"],
+      "formats": ["factur-x", "ubl", "cii"],
+      "ttm_setup_days": 60,
+      "strengths": [
+        "PA immatriculée définitive DGFiP (parmi les premières)",
+        "Capacité industrielle annoncée : 215M+ factures/an dès 2026",
+        "Clients de référence : TotalEnergies, Engie, Orange Business, BPCE, Cerfrance (320k TPE/PME via réseau)",
+        "Intégrations ERP enterprise (SAP, Oracle, Microsoft Dynamics)",
+        "Audit de conformité gratuit proposé"
+      ],
+      "weaknesses": [
+        "Pas adaptée TPE/micro-entrepreneurs (positionnement ETI/grandes entreprises)",
+        "Tarifs non publics — modèle devis B2B grandes structures",
+        "Setup long (typique 1-3 mois pour intégration ERP)",
+        "Pas de couverture statuts indépendants (SCI, LMNP, micro)"
+      ],
+      "sources": [
+        { "label": "Serensia (groupe Quadient)", "url": "https://serensia.com/", "consulted_at": "2026-04-25" },
+        { "label": "Quadient — Annonce capacité 215M factures", "url": "https://www.quadient.com/en/news/serensia-over-215-million-invoices-annually-by-2026-leader-in-french-e-invoicing-market", "consulted_at": "2026-04-25" },
+        { "label": "Liste DGFiP", "url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "consulted_at": "2026-04-26" }
+      ],
+      "notes": "Quadient a racheté Serensia en juin 2025 (source : Archimag). Agrément définitif obtenu en décembre 2025 (source : communiqué officiel Euronext 11/12/2025). Inclus dans le dataset comme référence segment grandes structures, en contraste avec Indy/Tiime/Henrri segment indépendants.",
+      "last_verified": "2026-04-26",
+      "_metadata": { "completion_level": "full" }
+    },
+    { "id": "atgp", "name": "@GP", "legal_name": null, "website": "https://www.atgp.net/", "address": "20 rue des Acacias, 26120 Montélier", "contact_email": "contact.pdp@atgp.net", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "ipaidthat", "name": "@iPaidThat", "legal_name": null, "website": "https://ipaidthat.io/fr", "address": "Avenue d'Alphasis, 35760 Saint-Grégoire", "contact_email": "contact@ipaidthat.io", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "n2f-pdp", "name": "@N2F PDP", "legal_name": null, "website": "https://www.n2f.com/fr/note-de-frais/", "address": "233 Chemin des Grandes Terres, 01250 Montagnat", "contact_email": "sales@n2f.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "abby", "name": "Abby", "legal_name": null, "website": "https://abby.fr/", "address": "223-225 avenue Général Leclerc, 54000 Nancy", "contact_email": "contact@abby.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Positionnement marché auto-entrepreneurs services connu (cf. article ressource ConformiCheck) — enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "accenture", "name": "Accenture", "legal_name": null, "website": "https://www.accenture.com/fr-fr", "address": "118 Avenue de France, 75013 Paris", "contact_email": "fr.contact.ecv@accenture.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Cabinet de conseil multinational, positionnement grandes entreprises et ETI. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "ademico-software", "name": "Ademico Software", "legal_name": null, "website": "https://ademico-software.com/", "address": "204 Heidebergstraat, 3010 Louvain (Belgique)", "contact_email": "info@ademico-software.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Belgique. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "agena-3000", "name": "Agena 3000", "legal_name": null, "website": "https://www.agena3000.com/fr/nos-solutions/a3-e-facture", "address": "88 Rue du Paradis, 49300 Cholet", "contact_email": "https://www.agena3000.com/fr/contact", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "agicap", "name": "Agicap", "legal_name": null, "website": "https://agicap.com/fr/", "address": "57 rue de Saint-Cyr, 69009 Lyon", "contact_email": "contact-pdp@agicap.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Solution gestion trésorerie connue, positionnement TPE/PME. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "arteva", "name": "Arteva", "legal_name": null, "website": "https://www.arteva.fr", "address": "330 Allée des Hêtres, 69760 Limonest", "contact_email": "contact-pdp@arteva.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "avalara", "name": "Avalara", "legal_name": null, "website": "https://www.avalara.com/eu/fr", "address": "33 Rue François 1er, 75008 Paris", "contact_email": "pdp-contact@avalara.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Avalara est un acteur international spécialisé compliance fiscale, positionnement ETI/grandes entreprises et e-commerce. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "axelor", "name": "Axelor", "legal_name": null, "website": "https://axelor.com/fr/", "address": "23 Rue Alfred Nobel, 77420 Champs-sur-Marne", "contact_email": "pa@axelor.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Date d'agrément 13/04/2026. ERP open source. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "axonaut", "name": "Axonaut", "legal_name": null, "website": "https://axonaut.com/", "address": "12 Rue Louis Renault, 31130 Balma", "contact_email": "hello@axonaut.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Solution CRM + facturation TPE/PME made in France. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "axway-software", "name": "Axway Software", "legal_name": null, "website": "https://www.axway.com/fr", "address": "1 Bis Place de la Défense, 92035 Paris La Défense Cedex", "contact_email": null, "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Date d'agrément 14/04/2026. Éditeur français coté logiciels d'intégration B2B. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "azopio", "name": "Azopio", "legal_name": null, "website": "https://www.azopio.com/fr/", "address": "38 rue de Wagram, 75008 Paris", "contact_email": "contact@azopio.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "b2brouter", "name": "B2BRouter", "legal_name": null, "website": "https://www.b2brouter.net/fr", "address": "Avenida Diagonal 433, 1-1, 08036 Barcelona (Espagne)", "contact_email": "comercial@b2brouter.net", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Espagne. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "b4value-net", "name": "B4Value.net", "legal_name": null, "website": "https://www.b4value.net/en/", "address": "Trippstadter Str. 122, 67663 Kaiserslautern (Allemagne)", "contact_email": "pdp@b4value.net", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Allemagne. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "basware", "name": "Basware", "legal_name": null, "website": "https://www.basware.com/fr", "address": "Linnoitustie 2, 02600 Espoo (Finlande)", "contact_email": "FranceMandate@basware.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Finlande. Acteur historique e-invoicing entreprises. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "bc-solutions", "name": "BC Solutions", "legal_name": null, "website": "https://bcsolutions.fr/", "address": "1330 Avenue Jean-René Guillibert Gautier de la Lauzière, 13290 Aix-en-Provence", "contact_email": "easinvoice.info@bcsolutions.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "billit", "name": "Billit", "legal_name": null, "website": "https://www.billit.eu/fr-be/", "address": "Oktrooiplein 1 boite 302, 9000 Gent (Belgique)", "contact_email": "support@billit.be", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Belgique. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "cbs-corporate-business-solutions", "name": "CBS Corporate Business Solutions", "legal_name": null, "website": "https://www.cbs-consulting.com/en/", "address": "Rudolf-Diesel-Straße 9, 69115 Heidelberg (Allemagne)", "contact_email": "kontakt@cbs-consulting.de", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Allemagne. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "cecurity", "name": "Cecurity", "legal_name": null, "website": "https://www.cecurity.com", "address": "75 Rue Saint-Lazare, 75009 Paris", "contact_email": "contact_cecurity@cecurity.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "cegedim", "name": "Cegedim", "legal_name": null, "website": "https://www.cegedim.fr", "address": "137 Rue d'Aguesseau, 92100 Boulogne-Billancourt", "contact_email": "sy-pdp@cegedim.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Groupe coté français spécialisé santé/assurance. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "cegi-alfa", "name": "Cegi Alfa", "legal_name": null, "website": "https://www.cegi.fr/", "address": "21 Rue Jules Verne, ZI du Brezet, 63000 Clermont-Ferrand", "contact_email": "contact-pa@cegialfa.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Date d'agrément 14/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "chaintrust", "name": "Chaintrust", "legal_name": null, "website": "https://www.chaintrust.io", "address": "9 rue des Colonnes, 75002 Paris", "contact_email": "pdp-contact@visma.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Email contact via groupe Visma. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "cleartax", "name": "ClearTax", "legal_name": null, "website": "https://www.cleartax.com/fr", "address": "42 rue Cambronne, 75015 Paris", "contact_email": "sales-europe@clear.in", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Acteur international (origine Inde) spécialisé fiscalité. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "comarch", "name": "Comarch", "legal_name": "Comarch SA", "website": "https://www.comarch.com/", "address": "al. Jana Pawła II 39a, Kraków (Pologne)", "contact_email": "contact.pa@comarch.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Pologne. Acteur ERP/EDI international. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "darva", "name": "Darva", "legal_name": null, "website": "https://www.darva.com", "address": "245 rue du stade, 79180 Chauray", "contact_email": "ofeli-pdp@darva.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Acteur historique secteur assurance (Ofeli). Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "dext", "name": "Dext", "legal_name": null, "website": "https://dext.com/fr/produits/logiciel-facturation", "address": "34 rue Laffitte, 75009 Paris", "contact_email": "pdp@dext.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Solution pré-comptabilité (ex-Receipt Bank), positionnement experts-comptables et TPE. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "digipharmacie", "name": "Digipharmacie", "legal_name": null, "website": "https://digipharmacie.fr/", "address": "81 Rue Réaumur, 75002 Paris", "contact_email": "jonathan.blajman@digipharmacie.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Spécialisation pharmacies (vertical santé). Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "digital-technologies", "name": "Digital Technologies", "legal_name": null, "website": "https://digtechs.com/?lang=fr", "address": "Via San Vittore 14, 20122 Milan (Italie)", "contact_email": "info@digtechs.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Italie. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "docoon", "name": "Docoon", "legal_name": null, "website": "https://docoon.com", "address": "81 Rue Réaumur, 75002 Paris", "contact_email": "contact@docoon.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "docoon-immo-freedz", "name": "Docoon Immo / Freedz", "legal_name": null, "website": "https://docoon.immo/", "address": "32 Boulevard Michelet, 13008 Marseille", "contact_email": "pdp@docoon.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Vertical immobilier. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "docprocess", "name": "DocProcess", "legal_name": null, "website": "https://doc-process.com/fr", "address": "14 Chemin des Clos, 38240 Meylan", "contact_email": "contact@doc-process.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "docuware", "name": "DocuWare", "legal_name": null, "website": "https://start.docuware.com/fr/", "address": "17 rue du Colisée, 75008 Paris", "contact_email": "infoline@docuware.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Acteur historique GED/dématérialisation. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "dougs", "name": "Dougs Facturation gratuite", "legal_name": null, "website": "https://www.dougs.fr/logiciel-facturation-gratuit/", "address": "Route de Sully la Chapelle, 45450 Fay-aux-Loges", "contact_email": "support@dougs.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Plan facturation gratuit positionnement TPE avec EC en marque blanche. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "doxallia", "name": "Doxallia", "legal_name": null, "website": "https://www.doxallia.com", "address": "Rue du Causse Comtal, 12340 Bozouls", "contact_email": "contact@doxallia.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "ecosio", "name": "Ecosio", "legal_name": null, "website": "https://ecosio.com", "address": "Wiedner Gürtel 9, 1100 Vienne (Autriche)", "contact_email": "einvoice@ecosio.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Autriche. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "edicom-group", "name": "EDICOM Group", "legal_name": null, "website": "https://edicomgroup.com", "address": "C/ Charles Robert Darwin, 8, Parque Tecnologico de Paterna, 46980 Valencia (Espagne)", "contact_email": "info_france@edicomgroup.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Espagne. Acteur EDI international. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "edicom-france", "name": "EDICOM France", "legal_name": null, "website": "https://edicomgroup.fr", "address": "55 Rue d'Amsterdam, 75008 Paris", "contact_email": "info_france@edicomgroup.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Filiale française du groupe EDICOM. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "edics-france", "name": "EDICS France", "legal_name": null, "website": "https://edics.fr/", "address": "5 Allée Moulin Berger, 69130 Écully", "contact_email": "support@edics.cloud", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "edt", "name": "EDT", "legal_name": null, "website": "https://www.group-edt.fr/", "address": "85 Rue Lavoisier, 38330 Montbonnot-Saint-Martin", "contact_email": "marketing@edt.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "eezi", "name": "EEZI by VAT IT", "legal_name": null, "website": "https://eezi.io/", "address": "29-31 Boulevard de la Paix, 78100 Saint-Germain-en-Laye", "contact_email": "PDP@eezi.io", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Spécialisation TVA et conformité internationale. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "effinum", "name": "Effinum by SPEE", "legal_name": null, "website": "https://www.effinum.fr/", "address": "18 Rue de l'Armorique, 75015 Paris", "contact_email": "contact@effinum.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "enerj", "name": "Enerj", "legal_name": null, "website": "https://www.enerj.fr/", "address": "3 Chemin de l'Orée du Bois, 69570 Dardilly", "contact_email": "contact@enerj.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "entropics", "name": "Entropics", "legal_name": null, "website": "https://entropics.fr", "address": "4 rue Paul Lintier, 69002 Lyon", "contact_email": "contact.pdp@entropics.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "esalink", "name": "Esalink", "legal_name": null, "website": "https://www.esalink.com", "address": "2 Rue Jules Méline, 51430 Bezannes", "contact_email": "contact@esalink.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "esi", "name": "ESI", "legal_name": null, "website": "https://www.esi-groupe.com/", "address": "50 Rue Jean Zay, 69800 Saint-Priest", "contact_email": "contact.pdp@esi-groupe.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "esker", "name": "Esker", "legal_name": null, "website": "https://www.esker.fr", "address": "113 Boulevard de la Bataille de Stalingrad, 69100 Villeurbanne", "contact_email": "contact-pdp@esker.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Acteur français coté logiciels d'automatisation document, positionnement ETI/grandes entreprises. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "euro-information", "name": "Euro Information", "legal_name": null, "website": "https://www.e-i.com/fr", "address": "4 Rue Frédéric-Guillaume Raiffeisen, 67000 Strasbourg", "contact_email": "pa-euroInformation@epithete.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Filiale technologique du Crédit Mutuel. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "facnote", "name": "Facnote PDP", "legal_name": null, "website": "https://www.facnote.com/", "address": "Sky Center La Marseille 2 B Bd Euroméditerranée, 13002 Marseille", "contact_email": "pdp@facnote.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "fiducial-cloud", "name": "Fiducial Cloud", "legal_name": null, "website": "https://www.fiducial.fr", "address": "41 Rue Du Capitaine Guynemer, 92400 Courbevoie", "contact_email": "contact@fiducialcloud.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Groupe Fiducial — services aux experts-comptables et entreprises. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "flowie", "name": "Flowie", "legal_name": null, "website": "https://www.get-flowie.com/", "address": "229 Rue Saint-Honoré, 75001 Paris", "contact_email": "hello.pdp@flowie.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "fulll", "name": "Fulll", "legal_name": null, "website": "https://www.fulll.fr/", "address": "14 Rue Rhin et Danube, 69009 Lyon", "contact_email": "e-invoicing@fulll.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "generix-group", "name": "Generix Group", "legal_name": null, "website": "https://www.generixgroup.com/fr", "address": "Tour Légende, 20 place de la Défense, 92050 Paris La Défense", "contact_email": "pdp@generixgroup.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Acteur français coté EDI/SCM/e-invoicing. Positionnement ETI/grandes entreprises. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "gestav", "name": "Gestav", "legal_name": null, "website": "https://gestav.com/", "address": "57 bis rue de la pomme rouge, 02100 Saint Quentin", "contact_email": "contact@gestav.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "groupe-sigma", "name": "Groupe Sigma", "legal_name": null, "website": "https://www.sigma.fr/", "address": "Rue Newton, 44240 La Chapelle-sur-Erdre", "contact_email": "produit.lixa.pa@sigma.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Marque produit 'Lixa' selon email contact. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "gurusoft", "name": "Gurusoft", "legal_name": null, "website": "https://guru-soft.com/home-espana/", "address": "AVDA BRASIL 29, 28020 Madrid (Espagne)", "contact_email": "sales.fr@guru-soft.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Espagne. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "icd-international", "name": "ICD International", "legal_name": null, "website": "https://icdint.fr", "address": "17 Rue Jeanne Braconnier, 92360 Meudon", "contact_email": "commercial@icdint.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "iedi", "name": "iEDI", "legal_name": "iEDI ApS", "website": "https://www.iedi.com/", "address": "Bybjergvej 14, 3060 Espergærde (Danemark)", "contact_email": "ds@iedi.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Danemark. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "iga-assurance", "name": "IGA Assurance", "legal_name": null, "website": "https://www.iga-assurance.fr/", "address": "58 Rue Etienne Dolet, 92240 Malakoff", "contact_email": "info@iga-e-invoicing.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Spécialisation assurance. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "indicom", "name": "Indicom", "legal_name": null, "website": "https://www.indicom.eu/en/idc-home", "address": "Via Carnevali 39, 20158 Milano (Italie)", "contact_email": "pdp.contact@indicom.eu", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Italie. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "infologic", "name": "Infologic", "legal_name": null, "website": "https://www.infologic-copilote.fr/", "address": "99 Avenue de Lyon, 26500 Bourg-lès-Valence", "contact_email": "facture-elec@infologic.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "invopop", "name": "Invopop", "legal_name": null, "website": "https://www.invopop.com/", "address": "Calle Pradillo 42, 28002 Madrid (Espagne)", "contact_email": "pdp@invopop.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Espagne. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "iopole", "name": "Iopole", "legal_name": null, "website": "https://www.iopole.com", "address": "145 Impasse John Locke, 34470 Pérols", "contact_email": "contact@iopole.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "itesoft", "name": "Itesoft", "legal_name": null, "website": "https://www.itesoft.com/fr", "address": "Chemin du Mas d'Andron, 30470 Aimargues", "contact_email": "contact@itesoft.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Acteur historique automatisation P2P. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "jefacture", "name": "jefacture.com", "legal_name": null, "website": "https://www.ecma-solutions.com", "address": "216 Rue Raymond Losserand, 75014 Paris", "contact_email": "contact@jefacture.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Édité par ECMA Solutions. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "klekoon", "name": "Klekoon", "legal_name": null, "website": "https://www.klekoon.com/", "address": "12 Rue Paul Langevin, 93270 Sevran", "contact_email": "contact.pa@klekoon.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "kolecto-pa", "name": "Kolecto PA", "legal_name": null, "website": "https://www.kolecto.fr", "address": "155 Boulevard Haussmann, 75008 Paris", "contact_email": "victor@kolecto.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Kolecto a 2 immatriculations distinctes (PA + PDP). Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "kolecto-pdp", "name": "Kolecto PDP", "legal_name": null, "website": "https://www.kolecto.fr", "address": "50 Rue la Boétie, 75008 Paris", "contact_email": "admin@kolecto.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Kolecto a 2 immatriculations distinctes (PA + PDP). Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "le-village-connecte", "name": "Le Village Connecté", "legal_name": null, "website": "https://village-connecte.fr/", "address": "2322 Route du Latéral, 47400 Fauguerolles", "contact_email": "contact-pdp@coaxis.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Email contact via Coaxis. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "legalinvoice-tinexta-infocert", "name": "Legalinvoice by Tinexta Infocert", "legal_name": null, "website": "https://www.infocert.it/", "address": "Piazzale Flaminio 1B, 00196 Rome (Italie)", "contact_email": "pdp@infocert.it", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Date d'agrément 13/04/2026. Siège Italie. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "logilec", "name": "Logilec", "legal_name": null, "website": "https://www.logilec.fr/", "address": "Route de Kerscao, 29480 Le Relecq-Kerhuon", "contact_email": "service.clients@logilec.leclerc", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Filiale du groupe Leclerc selon domaine email. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "lucca", "name": "Lucca", "legal_name": null, "website": "https://www.lucca.fr", "address": "151 Avenue de France, 75013 Paris", "contact_email": "plateforme-agreee@luccasoftware.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Éditeur RH/finance B2B français. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "macompta-fr", "name": "Macompta.fr", "legal_name": null, "website": "https://www.macompta.fr/", "address": "20 Rue des Greffières, 17140 Lagord", "contact_email": "commercial@macompta.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Solution comptabilité en ligne TPE/auto-entrepreneurs. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "marosa", "name": "Marosa", "legal_name": null, "website": "https://marosavat.com/", "address": "C/ Policarpo Sanz 36 - 2e D Vigo, 36202 Pontevedra (Espagne)", "contact_email": "marosanotifications@marosavat.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Espagne. Spécialisation TVA. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "medius", "name": "Medius", "legal_name": null, "website": "https://www.medius.com/fr", "address": "35 Rue des Jeuneurs, 75002 Paris", "contact_email": "info.france@medius.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Acteur AP automation international. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "mykinexo", "name": "MyKinexo PDP", "legal_name": null, "website": "https://www.kinexo.fr/", "address": "10 Rue Alain Gerbault, 35000 Rennes", "contact_email": "contact@kinexo.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "mysupply", "name": "MySupply", "legal_name": "MySupply ApS", "website": "https://mysupply.dk/en", "address": "Østre Fælledvej 8, 9400 Nørresundby (Danemark)", "contact_email": "info@mysupply.dk", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Danemark. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "my-unisoft", "name": "My Unisoft", "legal_name": null, "website": "https://myunisoft.fr/", "address": "4 Rue Galvani, 91300 Massy", "contact_email": "pa-support@myunisoft.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Date d'agrément 15/04/2026. Solution experts-comptables. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "neotimo", "name": "Neotimo", "legal_name": null, "website": "https://neotimo.com/", "address": "27 rue de la Tuilerie, 45200 Amilly", "contact_email": "https://neotimo.com/contact", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Date d'agrément 13/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "odoo", "name": "Odoo", "legal_name": null, "website": "https://www.odoo.com/fr_FR", "address": "40 Chaussée de Namur, 1367 Grand-Rosière (Belgique)", "contact_email": "pdp-contact@odoo.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Date d'agrément 15/04/2026. Siège Belgique. ERP open source largement déployé en France. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "one-up", "name": "One Up", "legal_name": null, "website": "https://smallbusiness.oneup.com/fr/", "address": "124 Rue Réaumur, 75002 Paris", "contact_email": "purchasing@oneup.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Solution comptabilité TPE. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "open-bee", "name": "Open Bee", "legal_name": null, "website": "https://www.openbee.com", "address": "ZAC des Longerays, 74370 Epagny Metz-Tessy", "contact_email": "https://www.openbee.com/nous-contacter/", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Acteur GED français. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "opentext", "name": "OpenText", "legal_name": null, "website": "https://www.opentext.fr", "address": "Taurusavenue 15 Zuidtoren, 2132 Hoofddorp (Pays-Bas)", "contact_email": "pdp.nl@opentext.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Pays-Bas. Acteur historique GED/EDI grandes entreprises. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "pagero", "name": "Pagero", "legal_name": null, "website": "https://www.pagero.com/fr", "address": "Västra Hamngatan 1, 411 17 Göteborg (Suède)", "contact_email": "info@pagero.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Suède (groupe Thomson Reuters depuis 2024). Acteur EDI international. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "paragon", "name": "Paragon", "legal_name": null, "website": "https://www.paragon.world/fr", "address": "274 Boulevard Clémenceau, 59700 Marcq-en-Barœul", "contact_email": "ipp@paragon-cc.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "payflows", "name": "Payflows", "legal_name": null, "website": "https://payflows.io", "address": "17 Rue de la Comète, 75007 Paris", "contact_email": "joseph@payflows.io", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Date d'agrément 15/04/2026. Solution finance B2B. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "pitney-bowes", "name": "Pitney Bowes", "legal_name": null, "website": "https://www.pitneybowes.com/fr", "address": "5 rue Francis de Pressensé, 93210 Saint-Denis", "contact_email": "admin.pdp@pb.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Acteur historique courrier/dématérialisation. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "qonto", "name": "Qonto", "legal_name": null, "website": "https://qonto.com/fr", "address": "18 Rue de Navarin, 75009 Paris", "contact_email": "contact-pdp@qonto.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Néobanque pro française leader, intégration facturation native. Plus de 500k clients revendiqués (presse 2024-2025). Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "qweeby", "name": "Qweeby", "legal_name": null, "website": "https://www.qweeby.fr/", "address": "8 Rue Louis Braille, 42000 Saint-Étienne", "contact_email": "hello_pdp@qweeby.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "sap", "name": "SAP", "legal_name": null, "website": "https://www.sap.com/france/", "address": "Dietmar-Hopp-Allee 16, 69190 Walldorf (Allemagne)", "contact_email": "sap_pdp_contact@sap.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Allemagne. Leader mondial ERP, positionnement grandes entreprises et ETI. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "scribee", "name": "Scribee", "legal_name": null, "website": "https://www.scribee.tech/", "address": "128 Rue la Boétie, 75008 Paris", "contact_email": "contact@scribee.tech", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "seeburger", "name": "Seeburger", "legal_name": null, "website": "https://www.seeburger.com/", "address": "1 Edisonstrasse, 75015 Bretten (Allemagne)", "contact_email": "info.fr@seeburger.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Allemagne. Acteur historique EDI/B2B integration. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "septeo", "name": "Septeo", "legal_name": null, "website": "https://www.septeopdp.com", "address": "194 avenue de la Gare sud de france, 34970 Lattes", "contact_email": "contact@septeopdp.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Groupe Septeo (édition logicielle juridique/notariat). Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "seqino", "name": "Seqino", "legal_name": null, "website": "https://seqino.com", "address": "2 Route de la Noue, 91190 Gif-sur-Yvette", "contact_email": "contact-pdp@seqino.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "seres", "name": "Seres", "legal_name": null, "website": "https://www.seres.fr", "address": "45 Bd Paul Vaillant Couturier, 94200 Ivry-sur-Seine", "contact_email": "contact@seres.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Acteur EDI. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "sni", "name": "SNI", "legal_name": null, "website": "https://snitechnology.net/fr", "address": "Dunajska jesta 136, 1000 Ljubljana (Slovénie)", "contact_email": "regulation@snitechnology.net", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Date d'agrément 13/04/2026. Siège Slovénie. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "solo", "name": "Solo", "legal_name": null, "website": "https://www.solo.fr", "address": "Sveavägen 13, 111 57 Stockholm (Suède)", "contact_email": "hello@solo.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Suède. Solution freelances/indépendants. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "sovos", "name": "Sovos", "legal_name": null, "website": "https://www.saphety.com/fr", "address": "Rua do Viriato nº 13, 3º étage, 1050 233 Lisbonne (Portugal)", "contact_email": "sovos-pdp_contact@sovos.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Portugal. Acteur compliance fiscale international (Sovos a racheté Saphety). Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "spendesk", "name": "Spendesk", "legal_name": null, "website": "https://www.spendesk.com/fr/", "address": "51 Rue de Londres, 75008 Paris", "contact_email": "hello@spendesk.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Plateforme de gestion des dépenses entreprises française. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "sps-commerce", "name": "SPS Commerce", "legal_name": null, "website": "https://tiekinetix.com/fr", "address": "De Corridor 5, 3621 ZA Breukelen (Pays-Bas)", "contact_email": "pdpcontact@spscommerce.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Pays-Bas. Acteur EDI retail/distribution. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "srci", "name": "SRCI", "legal_name": null, "website": "https://solutions.srci.fr/", "address": "4 Rue Joseph Fourier, 28000 Chartres", "contact_email": "commercial@srci.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "storecove", "name": "Storecove", "legal_name": null, "website": "https://www.storecove.com/fr/fr", "address": "s-Gravelandseweg 46D, 1211 BT Hilversum (Pays-Bas)", "contact_email": "info@storecove.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Pays-Bas. Acteur réseau Peppol e-invoicing international. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "super-pdp", "name": "Super PDP", "legal_name": null, "website": "https://www.superpdp.tech/", "address": "6 rue de la Dhuis, 75020 Paris", "contact_email": "contact@superpdp.tech", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "symtrax", "name": "Symtrax", "legal_name": null, "website": "https://www.symtrax.com/fr", "address": "11 Rue Raymond Marc, 30000 Nîmes", "contact_email": "contact.pdp@symtrax.eu", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "tenor", "name": "Tenor", "legal_name": null, "website": "https://tenorsolutions.com", "address": "5 Rue des Anciennes Tanneries, 69600 Oullins", "contact_email": "contact.pdp@tenorsolutions.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Acteur EDI/conversion. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "tesisquare", "name": "Tesisquare", "legal_name": "Tesisquare SpA", "website": "https://www.tesisquare.com/fr", "address": "Via Mendicità Istruita 24, 12042 Bra CN (Italie)", "contact_email": "digital_compliance@service.tesisquare.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Italie. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "tessi", "name": "Tessi Technologies", "legal_name": null, "website": "https://www.tessi.eu/fr", "address": "1-3 Avenue des Satellites, Immeuble Cassiopee, 33185 Le Haillan", "contact_email": "pdp.support@tessi.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Acteur historique BPO/dématérialisation français. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "tradeshift-babelway", "name": "Tradeshift Babelway", "legal_name": null, "website": "https://tradeshift.com/fr", "address": "Chemin du Cyclotron 6, 1348 Ottignies-Louvain-la-Neuve (Belgique)", "contact_email": "support@tradeshift.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Belgique. Plateforme B2B internationale (Tradeshift a racheté Babelway). Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "transalis", "name": "Transalis", "legal_name": "Transalis Limited", "website": "https://www.transalis.com/", "address": "Kyriakou Matsi 16, 1082 Nicosie (Chypre)", "contact_email": "mstares@transalis.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Chypre (groupe UK). Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "treso2", "name": "Treso2", "legal_name": null, "website": "http://www.treso2.com", "address": "35 Rue des Mathurins, 75008 Paris", "contact_email": "contact.pdp@treso2.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "tungsten-automation-france", "name": "Tungsten Automation France", "legal_name": null, "website": "https://www.tungstenautomation.fr/", "address": "18 Boulevard Malesherbes, 75008 Paris", "contact_email": "ruud.vanhilten@tungstenautomation.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Ex-Kofax. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "tx2-concept", "name": "TX2 Concept", "legal_name": null, "website": "https://tx2.fr", "address": "491 Boulevard Duhamel du Monceau, 45160 Olivet", "contact_email": "adm@tx2.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "ventya", "name": "Ventya", "legal_name": null, "website": "https://www.ventya.fr", "address": "3 Boulevard des Bouvets, 92000 Nanterre", "contact_email": "contact@ventya.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "veryswing", "name": "Veryswing", "legal_name": null, "website": "https://veryswing.com/", "address": "143bis Rue Yves le Coz, 78000 Versailles", "contact_email": "einvoicing@veryswing.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. ERP gestion d'activité. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "vosfactures", "name": "VosFactures", "legal_name": "Factuali", "website": "https://vosfactures.fr/", "address": "470 Promenade des Anglais, 06200 Nice", "contact_email": "info@vosfactures.fr", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Date d'agrément 15/04/2026. Solution facturation TPE/auto-entrepreneurs. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "voxel-amadeus", "name": "Voxel (Amadeus)", "legal_name": null, "website": "https://www.voxelgroup.net/facture-electronique/", "address": "Carrer Cristóbal de Moura 115, 1st floor, 08019 Barcelone (Espagne)", "contact_email": "pdp.contact-voxel@amadeus.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Espagne. Filiale du groupe Amadeus (tourisme/voyages). Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "weproc", "name": "Weproc", "legal_name": null, "website": "https://www.weproc.com/fr/", "address": "2 Parvis des Écoles, 83000 Toulon", "contact_email": "contact-pdp@weproc.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Solution e-procurement. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "wisetech-global", "name": "WiseTech Global", "legal_name": null, "website": "https://www.wisetechglobal.com/fr-fr/", "address": "25 Bourke Road, 2015 Alexandria NSW (Australie)", "contact_email": "communications@wisetechglobal.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Siège Australie. Acteur logistique/CargoWise. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "yooz", "name": "Yooz PDP", "legal_name": null, "website": "https://www.getyooz.com/fr", "address": "Le Sequoia Parc d'Andron, 30470 Aimargues", "contact_email": "contact@yoozpdp.com", "dgfip_status": "PA immatriculée", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Fiche minimale — données officielles DGFiP au 26/04/2026. Acteur français P2P automation. Enrichissement détaillé en cours.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } }
+  ],
+  "platforms_en_attente_tests_interop": [
+    { "id": "ags-records-management", "name": "AGS Records Management", "legal_name": null, "website": "https://www.ags-recordsmanagement.com/", "address": "20 Rue de la Guillauderie, 44118 La Chevrolière", "contact_email": "supportcommercial@agsrm.com", "dgfip_status": "PA en attente d'immatriculation", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Dossier complet en attente des tests d'interopérabilité (DGFiP, 26/04/2026). Pas encore PA immatriculée pleinement.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "arratech", "name": "Arratech", "legal_name": null, "website": "https://www.arratech.com/", "address": "Drottninggatan 33, 111 51 Stockholm (Suède)", "contact_email": "info@arratech.com", "dgfip_status": "PA en attente d'immatriculation", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Dossier complet en attente des tests d'interopérabilité (DGFiP, 26/04/2026). Siège Suède.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "aruba", "name": "Aruba", "legal_name": "Aruba S.p.A.", "website": "https://www.arubaonesuite.fr/", "address": "Via San Clemente n. 53, 24036 Ponte San Pietro (Italie)", "contact_email": "contact-pa@staff.aruba.it", "dgfip_status": "PA en attente d'immatriculation", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Dossier complet en attente des tests d'interopérabilité (DGFiP, 26/04/2026). Siège Italie. Acteur cloud/hosting.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "dokapi", "name": "Dokapi", "legal_name": null, "website": "https://www.dokapi.io/", "address": "75 Schuttersvest, 2800 Malines (Belgique)", "contact_email": "katrien.dewolf@dokapi.io", "dgfip_status": "PA en attente d'immatriculation", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Dossier complet en attente des tests d'interopérabilité (DGFiP, 26/04/2026). Siège Belgique.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "ecosio-intercom-vertex", "name": "Ecosio InterCom (Vertex)", "legal_name": null, "website": "https://ecosio.com/fr/", "address": "Maximilianstraße 35a, 80539 Munich (Allemagne)", "contact_email": "einvoice@ecosio.com", "dgfip_status": "PA en attente d'immatriculation", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Dossier complet en attente des tests d'interopérabilité (DGFiP, 26/04/2026). Filiale Vertex (Ecosio a été acquise en 2024).", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "edieyes-vision-care", "name": "EdiEyes Vision Care", "legal_name": null, "website": "https://www.edieyes.fr/", "address": "14 Allée du Haras, 49100 Angers", "contact_email": "commerce@edieyes.fr", "dgfip_status": "PA en attente d'immatriculation", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Dossier complet en attente des tests d'interopérabilité (DGFiP, 26/04/2026). Vertical optique/vision.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "fonoa", "name": "Fonoa", "legal_name": "Fonoa Technologies Limited", "website": "https://www.fonoa.com/", "address": "6th Floor, South Bank House, Barrow Street, D04 TR29 Dublin (Irlande)", "contact_email": "e-invoicing@fonoa.com", "dgfip_status": "PA en attente d'immatriculation", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Dossier complet en attente des tests d'interopérabilité (DGFiP, 26/04/2026). Siège Irlande.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "iaf", "name": "IAF", "legal_name": null, "website": "https://www.assistances.fr/", "address": "27 Rue Alfred Nobel, 77420 Champs-sur-Marne", "contact_email": "sebastien.b@iaf.fr", "dgfip_status": "PA en attente d'immatriculation", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Dossier complet en attente des tests d'interopérabilité (DGFiP, 26/04/2026).", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "melasoft", "name": "Melasoft", "legal_name": null, "website": "https://www.melasoft.com/", "address": "Gerbermühlstraße 32, 60594 Frankfurt (Allemagne)", "contact_email": "info@melasoft.com", "dgfip_status": "PA en attente d'immatriculation", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Dossier complet en attente des tests d'interopérabilité (DGFiP, 26/04/2026). Siège Allemagne.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "my-fiteco", "name": "My Fiteco", "legal_name": null, "website": "https://myfiteco.com/", "address": "Rue Albert Einstein, 53810 Changé", "contact_email": "pa+contact@fiteco.com", "dgfip_status": "PA en attente d'immatriculation", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Dossier complet en attente des tests d'interopérabilité (DGFiP, 26/04/2026). Cabinet expert-comptable Fiteco.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "newblack", "name": "Newblack", "legal_name": "Newblack B.V.", "website": "https://www.newblack.io/", "address": "P.J.Oudweg 4, 29e, 1314 CH Almere (Pays-Bas)", "contact_email": "compliance@newblack.io", "dgfip_status": "PA en attente d'immatriculation", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Dossier complet en attente des tests d'interopérabilité (DGFiP, 26/04/2026). Siège Pays-Bas.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "ntt-data-business-solutions", "name": "NTT Data Business Solutions", "legal_name": null, "website": "https://fr.nttdata.com/", "address": "Philipp-Reis-Str 2, 02625 Bautzen (Allemagne)", "contact_email": "sol-fr-contact@nttdata.com", "dgfip_status": "PA en attente d'immatriculation", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Dossier complet en attente des tests d'interopérabilité (DGFiP, 26/04/2026). Siège Allemagne (groupe NTT Data Japon).", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "numeria", "name": "Numeria", "legal_name": null, "website": "https://www.numeria.fr/", "address": "5 allée Rosa Luxembourg, 95610 Eragny", "contact_email": "info@numeria.fr", "dgfip_status": "PA en attente d'immatriculation", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Dossier complet en attente des tests d'interopérabilité (DGFiP, 26/04/2026).", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "opuscapita", "name": "OpusCapita Solutions (GEP)", "legal_name": null, "website": "https://www.gep.com", "address": "Innopoli 2 Tekniikantie 14, 02600 Espoo (Finlande)", "contact_email": "info@gep.com", "dgfip_status": "PA en attente d'immatriculation", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Dossier complet en attente des tests d'interopérabilité (DGFiP, 26/04/2026). Filiale GEP.", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "ratioo", "name": "Ratioo", "legal_name": null, "website": "https://ratioo.fr", "address": "300 Rue du Noir Debout, 59242 Cappelle-en-Pévèle", "contact_email": "contact@ratioo.fr", "dgfip_status": "PA en attente d'immatriculation", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Dossier complet en attente des tests d'interopérabilité (DGFiP, 26/04/2026).", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "shine", "name": "Shine", "legal_name": null, "website": "https://www.shine.fr/", "address": "Fiolstræde 17B, 1171 København (Danemark)", "contact_email": "contact@shine.co", "dgfip_status": "PA en attente d'immatriculation", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Dossier complet en attente des tests d'interopérabilité (DGFiP, 26/04/2026). Néobanque pro française (groupe SocGen).", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "taxera", "name": "Taxera", "legal_name": null, "website": "https://taxera.tech/", "address": "40 Rue Alexandre Dumas, 75011 Paris", "contact_email": "france@taxera.tech", "dgfip_status": "PA en attente d'immatriculation", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Dossier complet en attente des tests d'interopérabilité (DGFiP, 26/04/2026).", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "wakastellar", "name": "Wakastellar", "legal_name": null, "website": "https://www.wakastellar.com/", "address": "17 Rue de la Guillauderie, 44118 La Chevrolière", "contact_email": "pdp@wakastellar.com", "dgfip_status": "PA en attente d'immatriculation", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Dossier complet en attente des tests d'interopérabilité (DGFiP, 26/04/2026).", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } },
+    { "id": "xelya", "name": "Xelya", "legal_name": null, "website": "https://www.xelya.com/", "address": "1 Rue Royale, 174 Bureaux de la Colline, 92210 Saint-Cloud", "contact_email": "contact-pa@xelya.com", "dgfip_status": "PA en attente d'immatriculation", "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "dgfip_status_verified_at": "2026-04-26", "relay_pa": null, "notes": "Dossier complet en attente des tests d'interopérabilité (DGFiP, 26/04/2026).", "last_verified": "2026-04-26", "_metadata": { "completion_level": "minimal" } }
+  ],
+  "platforms_sc": [
+    {
+      "id": "ebp",
+      "name": "EBP",
+      "legal_name": "EBP Informatique SA (groupe Cegid)",
+      "website": "https://www.ebp.com",
+      "dgfip_status": "SC (Solution Compatible)",
+      "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees",
+      "dgfip_status_verified_at": "2026-04-26",
+      "relay_pa": "Cegid (groupe propriétaire)",
+      "headquarters": "Rambouillet, France",
+      "pricing": {
+        "has_free_tier": false,
+        "free_tier_label": null,
+        "tiers": [
+          { "name": "EBP Compta & Facturation", "price_month_ht_eur": "[à vérifier]", "target": "TPE — module gestion commerciale + comptabilité" },
+          { "name": "EBP Devis & Facturation", "price_month_ht_eur": "[à vérifier]", "target": "TPE — facturation seule" },
+          { "name": "EBP Open Line (BTP / Auto / Commerce)", "price_month_ht_eur": "[à vérifier]", "target": "TPE/PME sectoriel (BTP, auto, retail)" }
+        ],
+        "source": "https://www.ebp.com",
+        "verified_at": "2026-04-25",
+        "notes": "EBP n'affiche pas de tarifs publics directs. Promo en cours : 3 mois offerts jusqu'au 26/04/2026 (source page d'accueil au 25/04/2026)."
+      },
+      "statuses_supported": ["unipersonnelle", "sas_sarl_tpe", "asso"],
+      "statuses_not_supported_or_weak": ["micro", "ei_ir", "lmnp"],
+      "sectors_supported": ["btp", "retail", "industrie", "b2b_services", "transport"],
+      "sectors_weak": ["sante", "liberale_reglementee"],
+      "volumes_supported": ["vol_petit", "vol_moyen", "vol_eleve"],
+      "tva": {
+        "franchise": "[à vérifier]",
+        "autoliq_btp": true,
+        "marge": "[à vérifier]",
+        "exoneration_sante": "[à vérifier]",
+        "intracom": true,
+        "standard": true
+      },
+      "support": {
+        "phone": true,
+        "chat": "[à vérifier]",
+        "email": true,
+        "faq": true,
+        "sla_hours_estimated": 48
+      },
+      "integrations": ["ebp_paie", "ebp_immo", "cegid_pa", "principales_banques_fr"],
+      "formats": ["factur-x", "ubl"],
+      "ttm_setup_days": 14,
+      "strengths": [
+        "175 000 entreprises clientes revendiquées, 40 ans d'historique",
+        "Solutions sectorielles dédiées (BTP, automobile, commerce)",
+        "Réseau 5000+ partenaires IT pour déploiement",
+        "Adossée à la PA Cegid (groupe Cegid) — pas de coût flux supplémentaire annoncé"
+      ],
+      "weaknesses": [
+        "EBP n'est PAS une PA immatriculée elle-même — Solution Compatible (SC) reliée à la PA Cegid",
+        "Tarifs non publics (devis obligatoire)",
+        "Pas adaptée micro-entrepreneurs",
+        "Dépendance technique et tarifaire à la PA Cegid (groupe propriétaire)"
+      ],
+      "sources": [
+        { "label": "EBP — Site officiel", "url": "https://www.ebp.com", "consulted_at": "2026-04-25" },
+        { "label": "EBP PDP", "url": "https://www.ebp.com/pdp-plateforme-dematerialisation-partenaire/", "consulted_at": "2026-04-25" },
+        { "label": "Liste DGFiP", "url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "consulted_at": "2026-04-26" }
+      ],
+      "notes": "EBP est rachetée par Cegid en 2018. Au 26/04/2026, EBP n'apparaît PAS sur la liste officielle DGFiP des PA immatriculées : elle utilise la PA Cegid pour la transmission. Statut Solution Compatible (SC).",
+      "last_verified": "2026-04-26",
+      "_metadata": { "completion_level": "full" }
+    },
+    {
+      "id": "henrri",
+      "name": "Henrri",
+      "legal_name": "Henrri (groupe Rivalis SAS)",
+      "website": "https://www.henrri.com",
+      "dgfip_status": "SC (Solution Compatible)",
+      "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees",
+      "dgfip_status_verified_at": "2026-04-26",
+      "relay_pa": "Pennylane",
+      "headquarters": "Auxerre, France",
+      "pricing": {
+        "has_free_tier": true,
+        "free_tier_label": "Henrri (intégral)",
+        "tiers": [
+          { "name": "Henrri", "price_month_ht_eur": 0, "target": "auto-entrepreneurs, TPE, freelances — gratuit illimité" }
+        ],
+        "source": "https://www.henrri.com",
+        "verified_at": "2026-04-25",
+        "notes": "100% gratuit, pas d'option payante obligatoire annoncée. Modèle économique groupe Rivalis (conseil/coaching aux dirigeants)."
+      },
+      "statuses_supported": ["micro", "ei_ir", "unipersonnelle", "sas_sarl_tpe", "asso"],
+      "statuses_not_supported_or_weak": ["sci", "lmnp"],
+      "sectors_supported": ["b2b_services", "retail", "btp", "hcr", "b2c_services"],
+      "sectors_weak": ["sante", "liberale_reglementee", "industrie"],
+      "volumes_supported": ["vol_0", "vol_micro", "vol_petit", "vol_moyen"],
+      "tva": {
+        "franchise": true,
+        "autoliq_btp": "[à vérifier]",
+        "marge": "[à vérifier]",
+        "exoneration_sante": "[à vérifier]",
+        "intracom": "[à vérifier]",
+        "standard": true
+      },
+      "support": {
+        "phone": false,
+        "chat": true,
+        "email": true,
+        "faq": true,
+        "sla_hours_estimated": 48
+      },
+      "integrations": ["pennylane_pa", "principales_banques_fr"],
+      "formats": ["factur-x"],
+      "ttm_setup_days": 1,
+      "strengths": [
+        "100% gratuit, illimité, sans option payante",
+        "226 000+ entreprises et 2500+ comptables utilisateurs (revendiqué site officiel)",
+        "Made in France, hébergement domestique, certifié anti-fraude",
+        "Setup rapide (<1 jour)"
+      ],
+      "weaknesses": [
+        "Henrri n'est PAS une PA immatriculée — Solution Compatible (SC) reliée à la PA Pennylane",
+        "Dépendance opérationnelle à Pennylane pour la transmission DGFiP",
+        "Pas de support téléphone direct",
+        "Couverture régimes TVA spéciaux non documentée publiquement [à vérifier]",
+        "Modèle économique gratuit dépend du groupe Rivalis (risque pérennité long terme)"
+      ],
+      "sources": [
+        { "label": "Henrri — Site officiel", "url": "https://www.henrri.com", "consulted_at": "2026-04-25" },
+        { "label": "Henrri 2026 facturation électronique", "url": "https://www.henrri.com/en-2026-la-facturation-electronique-evolue-et-henrri-sera-pret/", "consulted_at": "2026-04-25" },
+        { "label": "Liste DGFiP", "url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "consulted_at": "2026-04-26" }
+      ],
+      "notes": "Henrri NON immatriculée PA au 26/04/2026 selon liste officielle DGFiP. S'appuie sur Pennylane (PA) pour la transmission. À surveiller : Henrri pourrait demander son propre agrément ultérieurement.",
+      "last_verified": "2026-04-26",
+      "_metadata": { "completion_level": "full" }
+    },
+    {
+      "id": "freebe",
+      "name": "Freebe",
+      "legal_name": "Freebe SAS",
+      "website": "https://www.freebe.me",
+      "dgfip_status": "SC (Solution Compatible)",
+      "dgfip_status_url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees",
+      "dgfip_status_verified_at": "2026-04-26",
+      "relay_pa": "[à vérifier — PA partenaire non publiquement précisée]",
+      "headquarters": "France [à vérifier]",
+      "pricing": {
+        "has_free_tier": false,
+        "free_tier_label": null,
+        "tiers": [
+          { "name": "Freelance / Micro-entrepreneur", "price_month_ht_eur": 12.5, "price_month_ttc_eur": 15, "target": "freelances, micro-entrepreneurs (essai 30 jours gratuit)" },
+          { "name": "EI / GIE", "price_month_ht_eur": 25, "price_month_ttc_eur": 30, "target": "entrepreneurs individuels, GIE" },
+          { "name": "SASU / SAS / EURL / SARL", "price_month_ht_eur": 16, "price_month_ttc_eur": 20, "target": "sociétés unipersonnelles et petites SAS/SARL" },
+          { "name": "Multi-Member / Société (multi-utilisateurs)", "price_month_ht_eur": 45, "price_month_ttc_eur": 54, "target": "sociétés multi-utilisateurs" }
+        ],
+        "source": "https://www.freebe.me/tarifs/",
+        "verified_at": "2026-04-25",
+        "notes": "Tarifs trimestriels et annuels avec remises (jusqu'à -20% annuel). Essai 30 jours sans CB."
+      },
+      "statuses_supported": ["micro", "ei_ir", "unipersonnelle", "sas_sarl_tpe"],
+      "statuses_not_supported_or_weak": ["sci", "lmnp", "asso"],
+      "sectors_supported": ["b2b_services", "liberale_autre"],
+      "sectors_weak": ["btp", "retail", "hcr", "sante", "industrie"],
+      "volumes_supported": ["vol_micro", "vol_petit", "vol_moyen"],
+      "tva": {
+        "franchise": true,
+        "autoliq_btp": "[à vérifier]",
+        "marge": "[à vérifier]",
+        "exoneration_sante": "[à vérifier]",
+        "intracom": "[à vérifier]",
+        "standard": true
+      },
+      "support": {
+        "phone": "[à vérifier]",
+        "chat": true,
+        "email": true,
+        "faq": true,
+        "sla_hours_estimated": 48
+      },
+      "integrations": ["urssaf", "synchronisation_450_banques", "principales_banques_fr"],
+      "formats": ["factur-x"],
+      "ttm_setup_days": 1,
+      "strengths": [
+        "Spécialiste freelances et indépendants (UX dédiée)",
+        "Synchronisation 450+ banques",
+        "Intégration URSSAF native (déclarations micro)",
+        "Essai 30 jours sans engagement, sans CB"
+      ],
+      "weaknesses": [
+        "Freebe n'est PAS une PA immatriculée — Solution Compatible (SC)",
+        "Identité de la PA partenaire non publiquement précisée [à vérifier]",
+        "Pas de plan gratuit (essai 30 jours uniquement)",
+        "Tarif EI 25€ HT/mois (positionnement payant)",
+        "Couverture régimes TVA spéciaux non documentée [à vérifier]"
+      ],
+      "sources": [
+        { "label": "Freebe — Tarifs", "url": "https://www.freebe.me/tarifs/", "consulted_at": "2026-04-25" },
+        { "label": "Freebe blog facturation électronique", "url": "https://www.freebe.me/blog/facturation-electronique", "consulted_at": "2026-04-25" },
+        { "label": "Liste DGFiP", "url": "https://www.impots.gouv.fr/je-consulte-la-liste-des-plateformes-agreees", "consulted_at": "2026-04-26" }
+      ],
+      "notes": "Freebe NON immatriculée PA au 26/04/2026. Statut Solution Compatible (SC). Identité de la PA partenaire à vérifier auprès de l'éditeur.",
+      "last_verified": "2026-04-26",
+      "_metadata": { "completion_level": "full" }
+    }
+  ]
+}

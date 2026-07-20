@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="API REST">
+  <title>API REST</title>
+  <rect width="48" height="48" rx="12" fill="#FFFFFF" fill-opacity="0.12"/>
+  <path fill="#7DD3FC" d="M12 18h24v2.5H12V18zm0 9.5h24V30H12v-2.5z"/>
+  <path fill="#FFFFFF" d="M16 14.5h3.2l2.4 9.2h.1l2.5-9.2H27l-3.7 12h-3.5l-3.8-12zm14.2 0H38v2.4h-5.2v2.6H37v2.3h-4.8v2.7H38v2h-7.8v-12z"/>
+</svg>

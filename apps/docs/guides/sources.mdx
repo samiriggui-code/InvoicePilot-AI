@@ -1,0 +1,42 @@
+---
+title: Sources
+description: Entrée des ventes — PDF, Shopify, WooCommerce et simulation API
+---
+
+# Sources
+
+**Mes sources** (app) = point d’entrée des ventes avant Analyse IA et Émission.
+
+## Statuts connecteurs
+
+| Source | Statut app | Sandbox API |
+|--------|------------|-------------|
+| PDF / tickets | Disponible | `POST /sources/import` `MANUAL_UPLOAD` |
+| Shopify | Disponible (sync) | `SHOPIFY` (simulé) |
+| WooCommerce | Disponible (sync) | `WOOCOMMERCE` (simulé) |
+| PrestaShop / Wix | Catalogue | Import simulé possible |
+| Amazon / Cdiscount | PDF export → upload | — |
+
+## Flux
+
+```
+Boutique / PDF  →  Mes sources  →  Mon analyse IA  →  Mon émission PA
+                         ↑
+              POST /api/v1/sources/import  (éditeurs)
+```
+
+## API sandbox
+
+```bash
+curl -X POST http://localhost:8081/api/v1/sources/import \
+  -H "Authorization: Bearer ip_sandbox_demo" \
+  -H "Content-Type: application/json" \
+  -d '{"source":"MANUAL_UPLOAD","filename":"facture.pdf","orders_count":1}'
+```
+
+Réponse typique : `import_id`, `invoices_staged`, `next` (passer au pipeline validate).
+
+<Info>
+  En **live**, le pull Shopify/Woo passe par les credentials saisis dans l’UI Sources.  
+  L’API sandbox ne remplace pas OAuth boutique — elle sert aux tests d’intégration éditeur.
+</Info>

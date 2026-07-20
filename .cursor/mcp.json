@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "reui": {
+      "url": "https://mcp.reui.io/api/mcp?free=1&style=radix-nova",
+      "headers": {
+        "X-Reui-Free-Only": "true",
+        "X-Reui-Style": "radix-nova"
+      }
+    }
+  }
+}

@@ -1,0 +1,64 @@
+---
+title: Déploiement VPS
+description: Docker Compose — app, sandbox API, Ollama LLM, Postgres, MinIO
+---
+
+# Déploiement VPS
+
+La sandbox API tourne **sur le même process** que l’app (route `/api/v1`).  
+Le VPS ajoute : Postgres, Redis, MinIO, **Ollama (LLM)**, Traefik.
+
+## Architecture
+
+```
+Internet → Traefik (TLS)
+              ├─ app.* / api.* / @  →  container app (:3010)
+              ├─ files.*            →  MinIO console
+              └─ (interne) ollama, postgres, redis
+```
+
+Fichier : `docker-compose.yml` à la racine du repo.
+
+## Variables critiques (`deploy/.env.example`)
+
+```env
+LLM_EXTRACT_ENABLED=true
+OLLAMA_BASE_URL=http://invoicepilot-ollama:11434
+OLLAMA_MODEL=qwen2.5:3b
+POSTGRES_PASSWORD=...
+MINIO_ROOT_PASSWORD=...
+```
+
+## Déploiement typique
+
+```bash
+# Sur le VPS
+cd /opt/invoicepilot
+cp deploy/.env.example .env   # puis éditer les secrets
+docker compose build app
+docker compose up -d
+# Premier pull modèle (~2 Go)
+docker compose logs -f ollama-init
+```
+
+Vérifications :
+
+```bash
+curl -s https://api.global-it-ss.com/api/v1/health
+curl -s -H "Authorization: Bearer ip_sandbox_demo" \
+  https://api.global-it-ss.com/api/v1/compliance/score
+```
+
+## LLM — pourquoi VPS et pas forcément le PC
+
+| | PC Laragon | VPS |
+|--|------------|-----|
+| RAM pour Ollama 3B | Souvent juste | 4 Go réservés dans compose |
+| Sandbox API | Oui | Oui |
+| Analyse IA | Heuristique (défaut) | LLM activé |
+
+Pour tester le LLM en local malgré tout : installer [Ollama](https://ollama.com), `ollama pull qwen2.5:3b`, puis les variables dans `.env` (voir [Analyse IA](/guides/analyse-ia)).
+
+## Entrypoint
+
+`deploy/entrypoint.sh` : `prisma db push` puis serveur Node `.output/server/index.mjs`.

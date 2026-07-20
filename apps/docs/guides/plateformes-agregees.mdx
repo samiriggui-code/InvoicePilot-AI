@@ -1,0 +1,38 @@
+---
+title: Plateformes agréées
+description: Choix PA, connexion org, dépôt / réception
+---
+
+# Plateformes agréées
+
+InvoicePilot **n’est pas** une PA. Flux :
+
+```
+Sources → InvoicePilot (conformité + storage) → PA immatriculée → destinataire
+```
+
+## Dans l’app
+
+Menu **2. Ma PA** (`/platforms`) :
+
+- Liste `approved_platforms` (seed : Qonto, Pennylane, Indy, Shine, Yooz, Basware, Chorus Pro…)
+- Connexion `organization_platform_connections` (EMISSION / RECEPTION / BOTH)
+- Sandbox : credentials `pending` — pas d’API PA réelle encore
+
+## À l’inscription
+
+Étape **PA** : « j’ai déjà une PA » ou **guidage** (volume, gratuit, banque, compta) → slug préféré enregistré dans `organization_bridge_profiles` + pré-connexion si trouvé.
+
+## Émission
+
+UI : facture `VALIDATED` + PA active → **Transmettre via PA** (`transmitInvoice` sandbox).  
+API : `POST /invoices/emit` (sandbox_accepted).
+
+## Réception
+
+UI : **/inbox** — factures `direction: PURCHASE`.  
+HTTP `GET /inbox` : roadmap (contrat figé dans `src/api/http/v1-routes.ts`).
+
+<Warning>
+  Vérifiez toujours le statut **immatriculation définitive** sur impots.gouv.fr avant prod.
+</Warning>

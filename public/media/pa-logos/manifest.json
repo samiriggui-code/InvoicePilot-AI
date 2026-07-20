@@ -1,0 +1,752 @@
+{
+  "generatedAt": "2026-07-18T22:07:52.907Z",
+  "sourceDataset": "elginux/pa-dataset",
+  "count": 149,
+  "logos": {
+    "indy": {
+      "file": "indy.png",
+      "name": "Indy",
+      "website": "https://www.indy.fr"
+    },
+    "pennylane": {
+      "file": "pennylane.png",
+      "name": "Pennylane",
+      "website": "https://www.pennylane.com/fr/"
+    },
+    "tiime": {
+      "file": "tiime.png",
+      "name": "Tiime",
+      "website": "https://www.tiime.fr"
+    },
+    "sellsy": {
+      "file": "sellsy.png",
+      "name": "Sellsy",
+      "website": "https://go.sellsy.com"
+    },
+    "sage": {
+      "file": "sage.png",
+      "name": "Sage",
+      "website": "https://www.sage.com/fr-fr/"
+    },
+    "cegid": {
+      "file": "cegid.png",
+      "name": "Cegid",
+      "website": "https://www.cegid.com/fr/"
+    },
+    "quadient-serensia": {
+      "file": "quadient-serensia.png",
+      "name": "Serensia by Quadient",
+      "website": "https://serensia.com"
+    },
+    "atgp": {
+      "file": "atgp.png",
+      "name": "@GP",
+      "website": "https://www.atgp.net/"
+    },
+    "ipaidthat": {
+      "file": "ipaidthat.svg",
+      "name": "@iPaidThat",
+      "website": "https://ipaidthat.io/fr"
+    },
+    "n2f-pdp": {
+      "file": "n2f-pdp.png",
+      "name": "@N2F PDP",
+      "website": "https://www.n2f.com/fr/note-de-frais/"
+    },
+    "abby": {
+      "file": "abby.png",
+      "name": "Abby",
+      "website": "https://abby.fr/"
+    },
+    "accenture": {
+      "file": "accenture.png",
+      "name": "Accenture",
+      "website": "https://www.accenture.com/fr-fr"
+    },
+    "ademico-software": {
+      "file": "ademico-software.png",
+      "name": "Ademico Software",
+      "website": "https://ademico-software.com/"
+    },
+    "agena-3000": {
+      "file": "agena-3000.png",
+      "name": "Agena 3000",
+      "website": "https://www.agena3000.com/fr/nos-solutions/a3-e-facture"
+    },
+    "agicap": {
+      "file": "agicap.png",
+      "name": "Agicap",
+      "website": "https://agicap.com/fr/"
+    },
+    "arteva": {
+      "file": "arteva.png",
+      "name": "Arteva",
+      "website": "https://www.arteva.fr"
+    },
+    "avalara": {
+      "file": "avalara.png",
+      "name": "Avalara",
+      "website": "https://www.avalara.com/eu/fr"
+    },
+    "axelor": {
+      "file": "axelor.png",
+      "name": "Axelor",
+      "website": "https://axelor.com/fr/"
+    },
+    "axonaut": {
+      "file": "axonaut.png",
+      "name": "Axonaut",
+      "website": "https://axonaut.com/"
+    },
+    "axway-software": {
+      "file": "axway-software.png",
+      "name": "Axway Software",
+      "website": "https://www.axway.com/fr"
+    },
+    "azopio": {
+      "file": "azopio.jpg",
+      "name": "Azopio",
+      "website": "https://www.azopio.com/fr/"
+    },
+    "b2brouter": {
+      "file": "b2brouter.png",
+      "name": "B2BRouter",
+      "website": "https://www.b2brouter.net/fr"
+    },
+    "b4value-net": {
+      "file": "b4value-net.png",
+      "name": "B4Value.net",
+      "website": "https://www.b4value.net/en/"
+    },
+    "basware": {
+      "file": "basware.png",
+      "name": "Basware",
+      "website": "https://www.basware.com/fr"
+    },
+    "bc-solutions": {
+      "file": "bc-solutions.png",
+      "name": "BC Solutions",
+      "website": "https://bcsolutions.fr/"
+    },
+    "billit": {
+      "file": "billit.png",
+      "name": "Billit",
+      "website": "https://www.billit.eu/fr-be/"
+    },
+    "cbs-corporate-business-solutions": {
+      "file": "cbs-corporate-business-solutions.png",
+      "name": "CBS Corporate Business Solutions",
+      "website": "https://www.cbs-consulting.com/en/"
+    },
+    "cecurity": {
+      "file": "cecurity.png",
+      "name": "Cecurity",
+      "website": "https://www.cecurity.com"
+    },
+    "cegedim": {
+      "file": "cegedim.png",
+      "name": "Cegedim",
+      "website": "https://www.cegedim.fr"
+    },
+    "cegi-alfa": {
+      "file": "cegi-alfa.png",
+      "name": "Cegi Alfa",
+      "website": "https://www.cegi.fr/"
+    },
+    "chaintrust": {
+      "file": "chaintrust.png",
+      "name": "Chaintrust",
+      "website": "https://www.chaintrust.io"
+    },
+    "cleartax": {
+      "file": "cleartax.png",
+      "name": "ClearTax",
+      "website": "https://www.cleartax.com/fr"
+    },
+    "comarch": {
+      "file": "comarch.png",
+      "name": "Comarch",
+      "website": "https://www.comarch.com/"
+    },
+    "darva": {
+      "file": "darva.png",
+      "name": "Darva",
+      "website": "https://www.darva.com"
+    },
+    "dext": {
+      "file": "dext.png",
+      "name": "Dext",
+      "website": "https://dext.com/fr/produits/logiciel-facturation"
+    },
+    "digipharmacie": {
+      "file": "digipharmacie.png",
+      "name": "Digipharmacie",
+      "website": "https://digipharmacie.fr/"
+    },
+    "digital-technologies": {
+      "file": "digital-technologies.png",
+      "name": "Digital Technologies",
+      "website": "https://digtechs.com/?lang=fr"
+    },
+    "docoon": {
+      "file": "docoon.png",
+      "name": "Docoon",
+      "website": "https://docoon.com"
+    },
+    "docoon-immo-freedz": {
+      "file": "docoon-immo-freedz.png",
+      "name": "Docoon Immo / Freedz",
+      "website": "https://docoon.immo/"
+    },
+    "docprocess": {
+      "file": "docprocess.png",
+      "name": "DocProcess",
+      "website": "https://doc-process.com/fr"
+    },
+    "docuware": {
+      "file": "docuware.png",
+      "name": "DocuWare",
+      "website": "https://start.docuware.com/fr/"
+    },
+    "dougs": {
+      "file": "dougs.png",
+      "name": "Dougs Facturation gratuite",
+      "website": "https://www.dougs.fr/logiciel-facturation-gratuit/"
+    },
+    "doxallia": {
+      "file": "doxallia.png",
+      "name": "Doxallia",
+      "website": "https://www.doxallia.com"
+    },
+    "ecosio": {
+      "file": "ecosio.png",
+      "name": "Ecosio",
+      "website": "https://ecosio.com"
+    },
+    "edicom-group": {
+      "file": "edicom-group.png",
+      "name": "EDICOM Group",
+      "website": "https://edicomgroup.com"
+    },
+    "edicom-france": {
+      "file": "edicom-france.png",
+      "name": "EDICOM France",
+      "website": "https://edicomgroup.fr"
+    },
+    "edics-france": {
+      "file": "edics-france.png",
+      "name": "EDICS France",
+      "website": "https://edics.fr/"
+    },
+    "edt": {
+      "file": "edt.png",
+      "name": "EDT",
+      "website": "https://www.group-edt.fr/"
+    },
+    "eezi": {
+      "file": "eezi.png",
+      "name": "EEZI by VAT IT",
+      "website": "https://eezi.io/"
+    },
+    "effinum": {
+      "file": "effinum.png",
+      "name": "Effinum by SPEE",
+      "website": "https://www.effinum.fr/"
+    },
+    "enerj": {
+      "file": "enerj.jpg",
+      "name": "Enerj",
+      "website": "https://www.enerj.fr/"
+    },
+    "entropics": {
+      "file": "entropics.png",
+      "name": "Entropics",
+      "website": "https://entropics.fr"
+    },
+    "esalink": {
+      "file": "esalink.png",
+      "name": "Esalink",
+      "website": "https://www.esalink.com"
+    },
+    "esi": {
+      "file": "esi.png",
+      "name": "ESI",
+      "website": "https://www.esi-groupe.com/"
+    },
+    "esker": {
+      "file": "esker.png",
+      "name": "Esker",
+      "website": "https://www.esker.fr"
+    },
+    "euro-information": {
+      "file": "euro-information.png",
+      "name": "Euro Information",
+      "website": "https://www.e-i.com/fr"
+    },
+    "facnote": {
+      "file": "facnote.png",
+      "name": "Facnote PDP",
+      "website": "https://www.facnote.com/"
+    },
+    "fiducial-cloud": {
+      "file": "fiducial-cloud.png",
+      "name": "Fiducial Cloud",
+      "website": "https://www.fiducial.fr"
+    },
+    "flowie": {
+      "file": "flowie.png",
+      "name": "Flowie",
+      "website": "https://www.get-flowie.com/"
+    },
+    "fulll": {
+      "file": "fulll.png",
+      "name": "Fulll",
+      "website": "https://www.fulll.fr/"
+    },
+    "generix-group": {
+      "file": "generix-group.png",
+      "name": "Generix Group",
+      "website": "https://www.generixgroup.com/fr"
+    },
+    "gestav": {
+      "file": "gestav.png",
+      "name": "Gestav",
+      "website": "https://gestav.com/"
+    },
+    "groupe-sigma": {
+      "file": "groupe-sigma.png",
+      "name": "Groupe Sigma",
+      "website": "https://www.sigma.fr/"
+    },
+    "gurusoft": {
+      "file": "gurusoft.png",
+      "name": "Gurusoft",
+      "website": "https://guru-soft.com/home-espana/"
+    },
+    "icd-international": {
+      "file": "icd-international.png",
+      "name": "ICD International",
+      "website": "https://icdint.fr"
+    },
+    "iedi": {
+      "file": "iedi.png",
+      "name": "iEDI",
+      "website": "https://www.iedi.com/"
+    },
+    "iga-assurance": {
+      "file": "iga-assurance.svg",
+      "name": "IGA Assurance",
+      "website": "https://www.iga-assurance.fr/"
+    },
+    "indicom": {
+      "file": "indicom.png",
+      "name": "Indicom",
+      "website": "https://www.indicom.eu/en/idc-home"
+    },
+    "infologic": {
+      "file": "infologic.png",
+      "name": "Infologic",
+      "website": "https://www.infologic-copilote.fr/"
+    },
+    "invopop": {
+      "file": "invopop.png",
+      "name": "Invopop",
+      "website": "https://www.invopop.com/"
+    },
+    "iopole": {
+      "file": "iopole.png",
+      "name": "Iopole",
+      "website": "https://www.iopole.com"
+    },
+    "itesoft": {
+      "file": "itesoft.png",
+      "name": "Itesoft",
+      "website": "https://www.itesoft.com/fr"
+    },
+    "jefacture": {
+      "file": "jefacture.png",
+      "name": "jefacture.com",
+      "website": "https://www.ecma-solutions.com"
+    },
+    "klekoon": {
+      "file": "klekoon.png",
+      "name": "Klekoon",
+      "website": "https://www.klekoon.com/"
+    },
+    "kolecto-pa": {
+      "file": "kolecto-pa.png",
+      "name": "Kolecto PA",
+      "website": "https://www.kolecto.fr"
+    },
+    "kolecto-pdp": {
+      "file": "kolecto-pdp.png",
+      "name": "Kolecto PDP",
+      "website": "https://www.kolecto.fr"
+    },
+    "le-village-connecte": {
+      "file": "le-village-connecte.png",
+      "name": "Le Village Connecté",
+      "website": "https://village-connecte.fr/"
+    },
+    "legalinvoice-tinexta-infocert": {
+      "file": "legalinvoice-tinexta-infocert.png",
+      "name": "Legalinvoice by Tinexta Infocert",
+      "website": "https://www.infocert.it/"
+    },
+    "logilec": {
+      "file": "logilec.png",
+      "name": "Logilec",
+      "website": "https://www.logilec.fr/"
+    },
+    "lucca": {
+      "file": "lucca.png",
+      "name": "Lucca",
+      "website": "https://www.lucca.fr"
+    },
+    "macompta-fr": {
+      "file": "macompta-fr.png",
+      "name": "Macompta.fr",
+      "website": "https://www.macompta.fr/"
+    },
+    "marosa": {
+      "file": "marosa.png",
+      "name": "Marosa",
+      "website": "https://marosavat.com/"
+    },
+    "medius": {
+      "file": "medius.png",
+      "name": "Medius",
+      "website": "https://www.medius.com/fr"
+    },
+    "mykinexo": {
+      "file": "mykinexo.png",
+      "name": "MyKinexo PDP",
+      "website": "https://www.kinexo.fr/"
+    },
+    "mysupply": {
+      "file": "mysupply.png",
+      "name": "MySupply",
+      "website": "https://mysupply.dk/en"
+    },
+    "my-unisoft": {
+      "file": "my-unisoft.png",
+      "name": "My Unisoft",
+      "website": "https://myunisoft.fr/"
+    },
+    "neotimo": {
+      "file": "neotimo.png",
+      "name": "Neotimo",
+      "website": "https://neotimo.com/"
+    },
+    "odoo": {
+      "file": "odoo.png",
+      "name": "Odoo",
+      "website": "https://www.odoo.com/fr_FR"
+    },
+    "one-up": {
+      "file": "one-up.png",
+      "name": "One Up",
+      "website": "https://smallbusiness.oneup.com/fr/"
+    },
+    "open-bee": {
+      "file": "open-bee.png",
+      "name": "Open Bee",
+      "website": "https://www.openbee.com"
+    },
+    "opentext": {
+      "file": "opentext.png",
+      "name": "OpenText",
+      "website": "https://www.opentext.fr"
+    },
+    "pagero": {
+      "file": "pagero.png",
+      "name": "Pagero",
+      "website": "https://www.pagero.com/fr"
+    },
+    "paragon": {
+      "file": "paragon.png",
+      "name": "Paragon",
+      "website": "https://www.paragon.world/fr"
+    },
+    "payflows": {
+      "file": "payflows.png",
+      "name": "Payflows",
+      "website": "https://payflows.io"
+    },
+    "pitney-bowes": {
+      "file": "pitney-bowes.png",
+      "name": "Pitney Bowes",
+      "website": "https://www.pitneybowes.com/fr"
+    },
+    "qonto": {
+      "file": "qonto.png",
+      "name": "Qonto",
+      "website": "https://qonto.com/fr"
+    },
+    "qweeby": {
+      "file": "qweeby.png",
+      "name": "Qweeby",
+      "website": "https://www.qweeby.fr/"
+    },
+    "sap": {
+      "file": "sap.png",
+      "name": "SAP",
+      "website": "https://www.sap.com/france/"
+    },
+    "scribee": {
+      "file": "scribee.png",
+      "name": "Scribee",
+      "website": "https://www.scribee.tech/"
+    },
+    "seeburger": {
+      "file": "seeburger.png",
+      "name": "Seeburger",
+      "website": "https://www.seeburger.com/"
+    },
+    "septeo": {
+      "file": "septeo.png",
+      "name": "Septeo",
+      "website": "https://www.septeopdp.com"
+    },
+    "seqino": {
+      "file": "seqino.jpg",
+      "name": "Seqino",
+      "website": "https://seqino.com"
+    },
+    "seres": {
+      "file": "seres.png",
+      "name": "Seres",
+      "website": "https://www.seres.fr"
+    },
+    "sni": {
+      "file": "sni.png",
+      "name": "SNI",
+      "website": "https://snitechnology.net/fr"
+    },
+    "solo": {
+      "file": "solo.png",
+      "name": "Solo",
+      "website": "https://www.solo.fr"
+    },
+    "sovos": {
+      "file": "sovos.png",
+      "name": "Sovos",
+      "website": "https://www.saphety.com/fr"
+    },
+    "spendesk": {
+      "file": "spendesk.png",
+      "name": "Spendesk",
+      "website": "https://www.spendesk.com/fr/"
+    },
+    "sps-commerce": {
+      "file": "sps-commerce.png",
+      "name": "SPS Commerce",
+      "website": "https://tiekinetix.com/fr"
+    },
+    "srci": {
+      "file": "srci.png",
+      "name": "SRCI",
+      "website": "https://solutions.srci.fr/"
+    },
+    "storecove": {
+      "file": "storecove.png",
+      "name": "Storecove",
+      "website": "https://www.storecove.com/fr/fr"
+    },
+    "super-pdp": {
+      "file": "super-pdp.png",
+      "name": "Super PDP",
+      "website": "https://www.superpdp.tech/"
+    },
+    "symtrax": {
+      "file": "symtrax.png",
+      "name": "Symtrax",
+      "website": "https://www.symtrax.com/fr"
+    },
+    "tenor": {
+      "file": "tenor.png",
+      "name": "Tenor",
+      "website": "https://tenorsolutions.com"
+    },
+    "tesisquare": {
+      "file": "tesisquare.png",
+      "name": "Tesisquare",
+      "website": "https://www.tesisquare.com/fr"
+    },
+    "tessi": {
+      "file": "tessi.png",
+      "name": "Tessi Technologies",
+      "website": "https://www.tessi.eu/fr"
+    },
+    "tradeshift-babelway": {
+      "file": "tradeshift-babelway.png",
+      "name": "Tradeshift Babelway",
+      "website": "https://tradeshift.com/fr"
+    },
+    "transalis": {
+      "file": "transalis.png",
+      "name": "Transalis",
+      "website": "https://www.transalis.com/"
+    },
+    "treso2": {
+      "file": "treso2.png",
+      "name": "Treso2",
+      "website": "http://www.treso2.com"
+    },
+    "tungsten-automation-france": {
+      "file": "tungsten-automation-france.jpg",
+      "name": "Tungsten Automation France",
+      "website": "https://www.tungstenautomation.fr/"
+    },
+    "tx2-concept": {
+      "file": "tx2-concept.jpg",
+      "name": "TX2 Concept",
+      "website": "https://tx2.fr"
+    },
+    "ventya": {
+      "file": "ventya.png",
+      "name": "Ventya",
+      "website": "https://www.ventya.fr"
+    },
+    "veryswing": {
+      "file": "veryswing.png",
+      "name": "Veryswing",
+      "website": "https://veryswing.com/"
+    },
+    "vosfactures": {
+      "file": "vosfactures.png",
+      "name": "VosFactures",
+      "website": "https://vosfactures.fr/"
+    },
+    "voxel-amadeus": {
+      "file": "voxel-amadeus.jpg",
+      "name": "Voxel (Amadeus)",
+      "website": "https://www.voxelgroup.net/facture-electronique/"
+    },
+    "weproc": {
+      "file": "weproc.png",
+      "name": "Weproc",
+      "website": "https://www.weproc.com/fr/"
+    },
+    "wisetech-global": {
+      "file": "wisetech-global.png",
+      "name": "WiseTech Global",
+      "website": "https://www.wisetechglobal.com/fr-fr/"
+    },
+    "yooz": {
+      "file": "yooz.png",
+      "name": "Yooz PDP",
+      "website": "https://www.getyooz.com/fr"
+    },
+    "ags-records-management": {
+      "file": "ags-records-management.png",
+      "name": "AGS Records Management",
+      "website": "https://www.ags-recordsmanagement.com/"
+    },
+    "arratech": {
+      "file": "arratech.png",
+      "name": "Arratech",
+      "website": "https://www.arratech.com/"
+    },
+    "aruba": {
+      "file": "aruba.png",
+      "name": "Aruba",
+      "website": "https://www.arubaonesuite.fr/"
+    },
+    "dokapi": {
+      "file": "dokapi.png",
+      "name": "Dokapi",
+      "website": "https://www.dokapi.io/"
+    },
+    "ecosio-intercom-vertex": {
+      "file": "ecosio-intercom-vertex.png",
+      "name": "Ecosio InterCom (Vertex)",
+      "website": "https://ecosio.com/fr/"
+    },
+    "edieyes-vision-care": {
+      "file": "edieyes-vision-care.png",
+      "name": "EdiEyes Vision Care",
+      "website": "https://www.edieyes.fr/"
+    },
+    "fonoa": {
+      "file": "fonoa.png",
+      "name": "Fonoa",
+      "website": "https://www.fonoa.com/"
+    },
+    "iaf": {
+      "file": "iaf.png",
+      "name": "IAF",
+      "website": "https://www.assistances.fr/"
+    },
+    "melasoft": {
+      "file": "melasoft.png",
+      "name": "Melasoft",
+      "website": "https://www.melasoft.com/"
+    },
+    "my-fiteco": {
+      "file": "my-fiteco.png",
+      "name": "My Fiteco",
+      "website": "https://myfiteco.com/"
+    },
+    "newblack": {
+      "file": "newblack.png",
+      "name": "Newblack",
+      "website": "https://www.newblack.io/"
+    },
+    "ntt-data-business-solutions": {
+      "file": "ntt-data-business-solutions.png",
+      "name": "NTT Data Business Solutions",
+      "website": "https://fr.nttdata.com/"
+    },
+    "numeria": {
+      "file": "numeria.png",
+      "name": "Numeria",
+      "website": "https://www.numeria.fr/"
+    },
+    "opuscapita": {
+      "file": "opuscapita.png",
+      "name": "OpusCapita Solutions (GEP)",
+      "website": "https://www.gep.com"
+    },
+    "ratioo": {
+      "file": "ratioo.png",
+      "name": "Ratioo",
+      "website": "https://ratioo.fr"
+    },
+    "shine": {
+      "file": "shine.png",
+      "name": "Shine",
+      "website": "https://www.shine.fr/"
+    },
+    "taxera": {
+      "file": "taxera.png",
+      "name": "Taxera",
+      "website": "https://taxera.tech/"
+    },
+    "wakastellar": {
+      "file": "wakastellar.png",
+      "name": "Wakastellar",
+      "website": "https://www.wakastellar.com/"
+    },
+    "xelya": {
+      "file": "xelya.png",
+      "name": "Xelya",
+      "website": "https://www.xelya.com/"
+    },
+    "ebp": {
+      "file": "ebp.jpg",
+      "name": "EBP",
+      "website": "https://www.ebp.com"
+    },
+    "henrri": {
+      "file": "henrri.png",
+      "name": "Henrri",
+      "website": "https://www.henrri.com"
+    },
+    "freebe": {
+      "file": "freebe.jpg",
+      "name": "Freebe",
+      "website": "https://www.freebe.me"
+    }
+  }
+}

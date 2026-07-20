@@ -1,0 +1,86 @@
+---
+title: Sandbox API
+description: Simuler Sources, pipeline conformité, émission et réception PA — local PC et VPS
+---
+
+# Sandbox API
+
+La sandbox **existe déjà sur votre machine** dès que `npm run dev` tourne.
+
+| | |
+|--|--|
+| **Base URL locale** | `http://localhost:8081/api/v1` |
+| **Base URL VPS** | `https://api.global-it-ss.com/api/v1` (même app Traefik) |
+| **Auth** | `Authorization: Bearer ip_sandbox_demo` |
+| **OpenAPI** | Onglet **API Reference** + `GET /api/openapi.json` |
+
+## Ce que la sandbox simule (sans PA réelle)
+
+| Domaine | Endpoint | Comportement sandbox |
+|---------|----------|----------------------|
+| Santé | `GET /health` | Liste des routes |
+| **Sources** | `POST /sources/import` | Import N factures fictives (Shopify, PDF…) |
+| Pipeline | `POST /invoices/validate` | Contrôles mentions 2026 |
+| Pipeline | `POST /invoices/remediate` | Patches + revalidation |
+| Pipeline | `POST /invoices/render` | XML Factur-X POC |
+| **Émission** | `POST /invoices/emit` | Acceptation simulée (`sandbox_accepted`) |
+| **Réception** | `GET /inbox` | Factures fournisseurs fictives |
+| **Réception** | `POST /inbox/{id}/ack` | Approuver / refuser |
+| Score | `GET /compliance/score` | Score démo |
+| Webhooks | `POST /webhooks` | Enregistrement URL HTTPS |
+
+<Warning>
+  Sandbox ≠ transmission légale. Aucun dépôt réel chez une PA.  
+  Live : clé `ip_live_…` + PA branchée dans **Ma plateforme agréée**.
+</Warning>
+
+## Exemple rapide — Sources puis émission
+
+```bash
+# 1) Simuler un import Shopify
+curl -s -X POST http://localhost:8081/api/v1/sources/import \
+  -H "Authorization: Bearer ip_sandbox_demo" \
+  -H "Content-Type: application/json" \
+  -d '{"source":"SHOPIFY","orders_count":2}'
+
+# 2) Valider une facture structurée
+curl -s -X POST http://localhost:8081/api/v1/invoices/validate \
+  -H "Authorization: Bearer ip_sandbox_demo" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "format":"factur-x",
+    "buyer":{"siren":"552100554","legal_name":"ACME SAS"},
+    "seller":{"siren":"512345678","legal_name":"Dupont Conseil"},
+    "operation_category":"SERVICES",
+    "issue_date":"2026-07-17",
+    "service_date":"2026-07-17",
+    "lines":[{"description":"Conseil","quantity":1,"unit_price_ht":100,"vat_rate":20}]
+  }'
+
+# 3) Émettre (simulé)
+curl -s -X POST http://localhost:8081/api/v1/invoices/emit \
+  -H "Authorization: Bearer ip_sandbox_demo" \
+  -H "Content-Type: application/json" \
+  -d '{ ... même body ... }'
+
+# 4) Réception
+curl -s http://localhost:8081/api/v1/inbox \
+  -H "Authorization: Bearer ip_sandbox_demo"
+```
+
+## Playground Mintlify
+
+1. `npm run docs:dev` → [http://localhost:3004](http://localhost:3004)
+2. Onglet **API Reference**
+3. Auth : `ip_sandbox_demo`
+4. Server : `http://localhost:8081/api/v1`
+
+## Local vs VPS
+
+| | PC (Laragon) | VPS (`docker-compose`) |
+|--|--------------|-------------------------|
+| Sandbox API | Oui (`npm run dev`) | Oui (même code, domaine `api.*`) |
+| Heuristique analyse | Oui (défaut) | Oui |
+| LLM Ollama | Optionnel (`OLLAMA_BASE_URL` + `LLM_EXTRACT_ENABLED=true`) | **Préparé** dans compose (4 Go RAM) |
+
+Voir [Déploiement VPS](/deploy-vps) pour activer Ollama + LLM en production.

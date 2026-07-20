@@ -1,0 +1,16 @@
+node_modules
+.git
+.output
+.tanstack
+.nitro
+.wrangler
+.vinxy
+dist
+.data
+*.log
+.env
+.env.local
+deploy/.env
+apps/docs/node_modules
+apps/docs/.next
+**/.DS_Store

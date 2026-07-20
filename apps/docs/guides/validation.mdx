@@ -1,0 +1,43 @@
+---
+title: Validation & remediation
+description: Contrôles mentions 2026, remediate, render Factur-X
+---
+
+# Validation & remediation
+
+Pipeline conforme au process pont :
+
+```
+validate → (remediate) → render → emit
+```
+
+## `POST /invoices/validate`
+
+Contrôles bloquants alignés sur l’app (`validateInvoiceDraft`) :
+
+| Code | Signification |
+|------|----------------|
+| `BUYER_SIREN_2026` | SIREN client (9 chiffres) |
+| `OPERATION_CATEGORY_2026` | GOODS / SERVICES / MIXED |
+| `ISSUE_DATE` / `SERVICE_DATE` | Dates requises |
+| `DELIVERY_ADDRESS_2026` | Adresse si livraison ≠ facturation |
+| `NO_LINES` / `LINE_*` | Lignes facture |
+
+Body structuré recommandé : `buyer`, `seller`, `operation_category`, `lines[]`.
+
+Mode legacy : `format` + `options.siren` (déprécié).
+
+## `POST /invoices/remediate`
+
+Applique `patches` (ex. `buyer_siren`, `operation_category`) et revalide.  
+Si `buyer.legal_name` sans SIREN → tentative lookup entreprise.
+
+Réponse : `invoice` fusionné + `next` (`/render` ou re-remediate).
+
+## `POST /invoices/render`
+
+Génère XML Factur-X (POC CII). Refuse si `valid: false`.
+
+## Statuts UI (miroir)
+
+`DRAFT` → `BLOCKED` → `VALIDATED` → `TRANSMITTING` → `TRANSMITTED` | `REJECTED`

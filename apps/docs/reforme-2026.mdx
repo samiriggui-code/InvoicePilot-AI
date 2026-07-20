@@ -1,0 +1,39 @@
+---
+title: Réforme 2026
+description: Calendrier, acteurs et mentions pour la facturation électronique B2B
+---
+
+# Réforme facturation électronique 2026
+
+## Calendrier
+
+| Obligation | Date | Qui |
+|------------|------|-----|
+| **Réception** e-factures | 1er septembre 2026 | Tous les assujettis |
+| **Émission** | 1er septembre 2026 | GE / ETI |
+| **Émission** | 1er septembre 2027 | PME / micro |
+
+## Acteurs
+
+- **PA (plateforme agréée)** : échange des factures, immatriculation DGFiP.
+- **PPF** : annuaire des assujettis + concentrateur vers la DGFiP. **Pas** d’échange gratuit.
+- **InvoicePilot** : solution compatible (contrôles, Factur-X, connecteurs) branchée sur votre PA.
+
+## 4 mentions obligatoires 2026
+
+1. SIREN du client  
+2. Catégorie d’opération (biens / services / mixte)  
+3. Option « paiement de la taxe d’après les débits » le cas échéant  
+4. Adresse de livraison si différente de la facturation  
+
+L’API `POST /invoices/validate` couvre une partie de ces contrôles côté sandbox.
+
+## Formats
+
+Factur-X (PDF/A-3 + XML CII), UBL, CII. Un PDF envoyé par e-mail **ne suffit plus** pour le B2B domestique.
+
+## Sources
+
+- [economie.gouv.fr — facturation électronique](https://www.economie.gouv.fr/entreprises/facturation-electronique)
+- Annuaire : facturation.chorus-pro.gouv.fr
+- Info nationale : 0 806 807 807

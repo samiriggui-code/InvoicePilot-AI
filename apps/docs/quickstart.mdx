@@ -1,0 +1,51 @@
+---
+title: Quickstart
+description: Premier appel sandbox en 2 minutes
+---
+
+# Quickstart
+
+Prérequis : `npm run dev` (app + API sur le port 8081).
+
+## 1. Santé
+
+```bash
+curl -s http://localhost:8081/api/v1/health
+```
+
+## 2. Valider une facture
+
+```bash
+curl -s -X POST http://localhost:8081/api/v1/invoices/validate \
+  -H "Authorization: Bearer ip_sandbox_demo" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "format": "factur-x",
+    "buyer": { "siren": "552100554", "legal_name": "ACME SAS" },
+    "seller": { "siren": "512345678", "legal_name": "Dupont Conseil" },
+    "operation_category": "SERVICES",
+    "issue_date": "2026-07-17",
+    "service_date": "2026-07-17",
+    "lines": [
+      {
+        "description": "Conseil",
+        "quantity": 1,
+        "unit_price_ht": 100,
+        "vat_rate": 20
+      }
+    ]
+  }'
+```
+
+## 3. Enchaîner le pipeline
+
+```
+validate → remediate (si bloqué) → render → emit
+```
+
+Détails : [Sandbox](/sandbox) · Playground : onglet **API Reference**.
+
+## 4. UI
+
+1. Login `owner@dupont.fr` / `Test1234!`
+2. Mes sources → Mon analyse IA → Mon émission PA
