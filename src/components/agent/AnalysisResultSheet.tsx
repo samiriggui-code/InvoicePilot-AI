@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { AlertTriangle, CheckCircle2, Clock, Loader2, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { InvoiceAnalysisProgress } from "@/components/agent/InvoiceAnalysisProgress";
 import { Badge } from "@/components/reui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -70,6 +71,8 @@ export function AnalysisResultSheet({
       setError(null);
       return;
     }
+    // Pendant l’analyse : ne pas écraser l’UI de progression par un reload.
+    if (analyzing) return;
 
     let cancelled = false;
     setLoading(true);
@@ -88,7 +91,7 @@ export function AnalysisResultSheet({
     return () => {
       cancelled = true;
     };
-  }, [open, invoiceId]);
+  }, [open, invoiceId, analyzing]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -104,7 +107,11 @@ export function AnalysisResultSheet({
         </SheetHeader>
 
         <div className="flex-1 space-y-5 px-6 py-5">
-          {loading ? (
+          {analyzing ? (
+            <InvoiceAnalysisProgress running tone="light" />
+          ) : null}
+
+          {loading && !analyzing ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 className="size-4 animate-spin" />
               Chargement…
@@ -113,7 +120,7 @@ export function AnalysisResultSheet({
 
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
-          {detail ? (
+          {detail && !analyzing ? (
             <>
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant={verdictVariant[detail.verdict]} size="sm">
@@ -182,8 +189,23 @@ export function AnalysisResultSheet({
                     <Sparkles className="mt-0.5 size-4 text-primary" />
                   )}
                   <div>
-                    <p className="text-sm font-semibold">{detail.nextAction.label}</p>
-                    <p className="mt-1 text-sm text-muted-foreground">{detail.nextAction.hint}</p>
+                    <p className="text-sm font-semibold">
+                      {detail.blockCode === "SELLER_SIREN_MISMATCH"
+                        ? "Émetteur hors tenant"
+                        : detail.nextAction.label}
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {detail.blockCode === "SELLER_SIREN_MISMATCH"
+                        ? "SIREN émetteur ≠ votre organisation — aucune donnée métier enregistrée (client, lignes, établissements)."
+                        : detail.nextAction.hint}
+                    </p>
+                    {detail.blockCode === "SELLER_SIREN_MISMATCH" ? (
+                      <ol className="mt-3 list-decimal space-y-1 pl-4 text-xs text-muted-foreground">
+                        <li>Facture fournisseur → Réception PA</li>
+                        <li>Mauvais PDF → remplacer en Sources</li>
+                        <li>Bonne vente, mauvais compte → vérifier SIREN org</li>
+                      </ol>
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -252,25 +274,46 @@ export function AnalysisResultSheet({
         {detail ? (
           <SheetFooter className="border-t border-border/60 px-6 py-4 sm:justify-start">
             <div className="flex w-full flex-wrap gap-2">
-              {detail.verdict === "A_ANALYSER" ||
-              detail.verdict === "BLOQUE" ||
-              detail.verdict === "A_VALIDER" ? (
-                <Button disabled={analyzing} onClick={() => onAnalyze?.(detail.id)}>
-                  {analyzing ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <Sparkles className="size-4" />
-                  )}
-                  {detail.verdict === "A_ANALYSER" ? "Analyser" : "Relancer l’analyse"}
-                </Button>
-              ) : null}
-              {detail.nextAction.href ? (
-                <Button variant="outline" asChild>
-                  <Link to={detail.nextAction.href} onClick={() => onOpenChange(false)}>
-                    {detail.nextAction.label} →
-                  </Link>
-                </Button>
-              ) : null}
+              {detail.blockCode === "SELLER_SIREN_MISMATCH" ? (
+                <>
+                  {detail.nextAction.href ? (
+                    <Button asChild>
+                      <Link to={detail.nextAction.href} onClick={() => onOpenChange(false)}>
+                        {detail.nextAction.label} →
+                      </Link>
+                    </Button>
+                  ) : null}
+                  {detail.secondaryActions.map((a) => (
+                    <Button key={a.href} variant="outline" asChild>
+                      <Link to={a.href} onClick={() => onOpenChange(false)}>
+                        {a.label}
+                      </Link>
+                    </Button>
+                  ))}
+                </>
+              ) : (
+                <>
+                  {detail.verdict === "A_ANALYSER" ||
+                  detail.verdict === "BLOQUE" ||
+                  detail.verdict === "A_VALIDER" ? (
+                    <Button disabled={analyzing} onClick={() => onAnalyze?.(detail.id)}>
+                      {analyzing ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Sparkles className="size-4" />
+                      )}
+                      {detail.verdict === "A_ANALYSER" ? "Analyser" : "Relancer l’analyse"}
+                    </Button>
+                  ) : null}
+                  {detail.nextAction.href ? (
+                    <Button variant="outline" asChild>
+                      <Link to={detail.nextAction.href} onClick={() => onOpenChange(false)}>
+                        {detail.nextAction.label} →
+                      </Link>
+                    </Button>
+                  ) : null}
+                </>
+              )}
             </div>
           </SheetFooter>
         ) : null}

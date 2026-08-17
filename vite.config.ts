@@ -37,7 +37,9 @@ export default defineConfig(({ mode, command }) => {
     define: envDefine,
     server: {
       host: "::",
-      port: 8080,
+      // 8080 = Laragon nginx (InvoicePilot-AI.test) — ne pas coller dessus
+      port: 8081,
+      strictPort: true,
     },
     resolve: {
       alias: { "@": `${process.cwd()}/src` },

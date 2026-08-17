@@ -2,6 +2,7 @@ import { createElement } from "react";
 import { createServerFn } from "@tanstack/react-start";
 import { randomBytes } from "node:crypto";
 
+import { formatAuditActionLabel } from "@/lib/audit-labels";
 import type { MemberRole } from "@/lib/types";
 import { canManageTeam, INVITABLE_ROLES, MEMBER_ROLE_LABELS } from "@/lib/team-roles";
 
@@ -244,30 +245,13 @@ export const getTeamMember = createServerFn({ method: "GET" })
         ...auditLogs.map((log) => ({
           id: log.id,
           action: log.action,
-          label: formatAuditLabel(log.action, log.entityType),
+          label: formatAuditActionLabel(log.action, log.entityType),
           createdAt: log.createdAt.toISOString(),
         })),
       ].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
       organizationName: workspace.organization.tradeName ?? workspace.organization.legalName,
     };
   });
-
-function formatAuditLabel(action: string, entityType: string | null): string {
-  const map: Record<string, string> = {
-    "team.member_joined": "A rejoint l’organisation",
-    "team.role_updated": "Rôle mis à jour",
-    "team.member_archived": "Compte archivé",
-    "team.member_restored": "Compte restauré",
-    "team.member_removed": "Retiré de l’organisation",
-    "api_key.created": "Clé API créée",
-    "api_key.revoked": "Clé API révoquée",
-    "integration.connected": "Intégration connectée",
-    "integration.disconnected": "Intégration déconnectée",
-  };
-  if (map[action]) return map[action];
-  if (entityType) return `${action} · ${entityType}`;
-  return action;
-}
 
 export const inviteTeamMember = createServerFn({ method: "POST" })
   .validator((data: { email: string; role: MemberRole }) => data)

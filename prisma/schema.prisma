@@ -13,35 +13,36 @@ datasource db {
 // ─── Auth & multi-entreprises (Lot 0, Module F3) ─────────────────────────────
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String?  @map("password_hash")
-  name         String?
+  id               String    @id @default(cuid())
+  email            String    @unique
+  passwordHash     String?   @map("password_hash")
+  name             String?
   /// Clé avatar Metronic (ex. "300-12") — fichiers /public/media/avatars/
-  avatarKey    String?  @map("avatar_key")
-  emailVerified DateTime? @map("email_verified")
-  twoFactorEnabled Boolean @default(false) @map("two_factor_enabled")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  avatarKey        String?   @map("avatar_key")
+  emailVerified    DateTime? @map("email_verified")
+  twoFactorEnabled Boolean   @default(false) @map("two_factor_enabled")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
 
-  memberships       OrganizationMember[]
-  invitesSent       OrganizationInvite[] @relation("InviteSender")
-  passwordResets    PasswordResetToken[]
-  twoFactorCodes    TwoFactorCode[]
-  authSessions      AuthSession[]
-  aiConversations   AiConversation[]
-  auditLogs         AuditLog[]
-  notifications     Notification[]
+  memberships     OrganizationMember[]
+  invitesSent     OrganizationInvite[] @relation("InviteSender")
+  passwordResets  PasswordResetToken[]
+  twoFactorCodes  TwoFactorCode[]
+  authSessions    AuthSession[]
+  aiConversations AiConversation[]
+  auditLogs       AuditLog[]
+  notifications   Notification[]
 
   @@map("users")
 }
 
 model AuthSession {
-  id        String   @id @default(cuid())
-  userId    String   @map("user_id")
-  tokenHash String   @unique @map("token_hash")
-  expiresAt DateTime @map("expires_at")
-  createdAt DateTime @default(now()) @map("created_at")
+  id        String    @id @default(cuid())
+  userId    String    @map("user_id")
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  lockedAt  DateTime? @map("locked_at")
+  createdAt DateTime  @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -51,12 +52,12 @@ model AuthSession {
 }
 
 model PasswordResetToken {
-  id        String   @id @default(cuid())
-  userId    String   @map("user_id")
-  tokenHash String   @unique @map("token_hash")
-  expiresAt DateTime @map("expires_at")
+  id        String    @id @default(cuid())
+  userId    String    @map("user_id")
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
   usedAt    DateTime? @map("used_at")
-  createdAt DateTime @default(now()) @map("created_at")
+  createdAt DateTime  @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -65,13 +66,13 @@ model PasswordResetToken {
 }
 
 model TwoFactorCode {
-  id        String   @id @default(cuid())
-  userId    String   @map("user_id")
-  codeHash  String   @map("code_hash")
+  id        String           @id @default(cuid())
+  userId    String           @map("user_id")
+  codeHash  String           @map("code_hash")
   channel   TwoFactorChannel @default(EMAIL)
-  expiresAt DateTime @map("expires_at")
-  usedAt    DateTime? @map("used_at")
-  createdAt DateTime @default(now()) @map("created_at")
+  expiresAt DateTime         @map("expires_at")
+  usedAt    DateTime?        @map("used_at")
+  createdAt DateTime         @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -85,30 +86,30 @@ enum TwoFactorChannel {
 }
 
 model Organization {
-  id          String   @id @default(cuid())
-  legalName   String   @map("legal_name")
-  tradeName   String?  @map("trade_name")
-  siren       String   @db.VarChar(9)
-  siret       String?  @unique @db.VarChar(14)
-  vatNumber   String?  @map("vat_number")
-  email       String?
-  phone       String?
+  id        String  @id @default(cuid())
+  legalName String  @map("legal_name")
+  tradeName String? @map("trade_name")
+  siren     String  @db.VarChar(9)
+  siret     String? @unique @db.VarChar(14)
+  vatNumber String? @map("vat_number")
+  email     String?
+  phone     String?
 
-  addressLine1   String? @map("address_line1")
-  addressLine2   String? @map("address_line2")
-  postalCode     String? @map("postal_code")
-  city           String?
-  countryCode    String  @default("FR") @map("country_code") @db.VarChar(2)
+  addressLine1 String? @map("address_line1")
+  addressLine2 String? @map("address_line2")
+  postalCode   String? @map("postal_code")
+  city         String?
+  countryCode  String  @default("FR") @map("country_code") @db.VarChar(2)
 
-  size        OrganizationSize @default(PME)
-  vatRegime   VatRegime        @default(STANDARD) @map("vat_regime")
+  size      OrganizationSize @default(PME)
+  vatRegime VatRegime        @default(STANDARD) @map("vat_regime")
 
   /// Compte seed / sandbox produit — jamais un client réel
-  isDemo      Boolean          @default(false) @map("is_demo")
+  isDemo Boolean @default(false) @map("is_demo")
 
   complianceScore Decimal? @map("compliance_score") @db.Decimal(5, 2)
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
   members              OrganizationMember[]
   invites              OrganizationInvite[]
@@ -261,22 +262,22 @@ enum SubscriptionStatus {
 // ─── Module A — Diagnostic & checklist ───────────────────────────────────────
 
 model ComplianceDiagnostic {
-  id             String   @id @default(cuid())
-  organizationId String   @map("organization_id")
+  id             String @id @default(cuid())
+  organizationId String @map("organization_id")
 
-  companySize      OrganizationSize? @map("company_size")
-  vatRegime        VatRegime?        @map("vat_regime")
-  hasB2bClients    Boolean           @default(true) @map("has_b2b_clients")
-  hasB2cClients    Boolean           @default(false) @map("has_b2c_clients")
-  hasForeignClients Boolean          @default(false) @map("has_foreign_clients")
-  hasPublicSector  Boolean           @default(false) @map("has_public_sector")
-  currentTooling   String?           @map("current_tooling")
+  companySize       OrganizationSize? @map("company_size")
+  vatRegime         VatRegime?        @map("vat_regime")
+  hasB2bClients     Boolean           @default(true) @map("has_b2b_clients")
+  hasB2cClients     Boolean           @default(false) @map("has_b2c_clients")
+  hasForeignClients Boolean           @default(false) @map("has_foreign_clients")
+  hasPublicSector   Boolean           @default(false) @map("has_public_sector")
+  currentTooling    String?           @map("current_tooling")
 
-  mustReceiveBy       DateTime? @map("must_receive_by")
-  mustEmitBy          DateTime? @map("must_emit_by")
-  needsEInvoicing     Boolean   @default(true) @map("needs_e_invoicing")
-  needsEReportingTx   Boolean   @default(false) @map("needs_e_reporting_tx")
-  needsEReportingPay  Boolean   @default(false) @map("needs_e_reporting_pay")
+  mustReceiveBy      DateTime? @map("must_receive_by")
+  mustEmitBy         DateTime? @map("must_emit_by")
+  needsEInvoicing    Boolean   @default(true) @map("needs_e_invoicing")
+  needsEReportingTx  Boolean   @default(false) @map("needs_e_reporting_tx")
+  needsEReportingPay Boolean   @default(false) @map("needs_e_reporting_pay")
 
   completedAt DateTime? @map("completed_at")
   createdAt   DateTime  @default(now()) @map("created_at")
@@ -321,21 +322,21 @@ model Counterparty {
   organizationId String           @map("organization_id")
   type           CounterpartyType @default(CLIENT)
 
-  legalName   String  @map("legal_name")
-  siren       String? @db.VarChar(9)
-  siret       String? @db.VarChar(14)
-  vatNumber   String? @map("vat_number")
-  email       String?
-  phone       String?
+  legalName String  @map("legal_name")
+  siren     String? @db.VarChar(9)
+  siret     String? @db.VarChar(14)
+  vatNumber String? @map("vat_number")
+  email     String?
+  phone     String?
 
-  billingLine1    String? @map("billing_line1")
-  billingLine2    String? @map("billing_line2")
-  billingPostal   String? @map("billing_postal")
-  billingCity     String? @map("billing_city")
-  billingCountry  String  @default("FR") @map("billing_country") @db.VarChar(2)
+  billingLine1   String? @map("billing_line1")
+  billingLine2   String? @map("billing_line2")
+  billingPostal  String? @map("billing_postal")
+  billingCity    String? @map("billing_city")
+  billingCountry String  @default("FR") @map("billing_country") @db.VarChar(2)
 
   /// Particulier / hors e-invoicing B2B (e-reporting)
-  isConsumer Boolean @default(false) @map("is_consumer")
+  isConsumer             Boolean          @default(false) @map("is_consumer")
   defaultTransactionType TransactionType? @map("default_transaction_type")
 
   deliveryLine1   String? @map("delivery_line1")
@@ -352,7 +353,7 @@ model Counterparty {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  organization   Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization   Organization                @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   invoices       Invoice[]
   establishments CounterpartyEstablishment[]
 
@@ -415,9 +416,9 @@ model InvoiceSequence {
 }
 
 model Invoice {
-  id             String          @id @default(cuid())
-  organizationId String          @map("organization_id")
-  counterpartyId String?         @map("counterparty_id")
+  id             String  @id @default(cuid())
+  organizationId String  @map("organization_id")
+  counterpartyId String? @map("counterparty_id")
 
   direction InvoiceDirection @default(SALE)
   type      InvoiceType      @default(INVOICE)
@@ -437,36 +438,36 @@ model Invoice {
   sourceExternalId String? @map("source_external_id")
 
   // Mentions 2026 (Module B2)
-  buyerSiren            String? @map("buyer_siren") @db.VarChar(9)
-  buyerSiret            String? @map("buyer_siret") @db.VarChar(14)
-  sellerEstablishmentId String? @map("seller_establishment_id")
-  buyerEstablishmentId  String? @map("buyer_establishment_id")
+  buyerSiren            String?            @map("buyer_siren") @db.VarChar(9)
+  buyerSiret            String?            @map("buyer_siret") @db.VarChar(14)
+  sellerEstablishmentId String?            @map("seller_establishment_id")
+  buyerEstablishmentId  String?            @map("buyer_establishment_id")
   transactionType       TransactionType    @default(B2B_DOMESTIC) @map("transaction_type")
   operationCategory     OperationCategory? @map("operation_category")
   vatOnDebitsOption     Boolean            @default(false) @map("vat_on_debits_option")
   deliveryDiffers       Boolean            @default(false) @map("delivery_differs")
 
   // Conditions de paiement (Module B1)
-  paymentTermsDays   Int?     @map("payment_terms_days")
+  paymentTermsDays     Int?     @map("payment_terms_days")
   earlyPaymentDiscount Decimal? @map("early_payment_discount") @db.Decimal(5, 2)
-  latePenaltyRate    Decimal? @map("late_penalty_rate") @db.Decimal(5, 2)
-  recoveryFeeAmount  Decimal  @default(40) @map("recovery_fee_amount") @db.Decimal(10, 2)
+  latePenaltyRate      Decimal? @map("late_penalty_rate") @db.Decimal(5, 2)
+  recoveryFeeAmount    Decimal  @default(40) @map("recovery_fee_amount") @db.Decimal(10, 2)
 
   // Mentions particulières (Module B3)
   franchiseVatMention Boolean @default(false) @map("franchise_vat_mention")
   reverseCharge       Boolean @default(false) @map("reverse_charge")
 
-  subtotalHt  Decimal @default(0) @map("subtotal_ht") @db.Decimal(14, 2)
-  totalVat    Decimal @default(0) @map("total_vat") @db.Decimal(14, 2)
-  totalTtc    Decimal @default(0) @map("total_ttc") @db.Decimal(14, 2)
+  subtotalHt     Decimal @default(0) @map("subtotal_ht") @db.Decimal(14, 2)
+  totalVat       Decimal @default(0) @map("total_vat") @db.Decimal(14, 2)
+  totalTtc       Decimal @default(0) @map("total_ttc") @db.Decimal(14, 2)
   discountAmount Decimal @default(0) @map("discount_amount") @db.Decimal(14, 2)
 
   complianceScore Decimal? @map("compliance_score") @db.Decimal(5, 2)
 
   // Liens devis / avoir / facture corrigée
-  sourceQuoteId    String? @map("source_quote_id")
+  sourceQuoteId      String? @map("source_quote_id")
   correctedInvoiceId String? @map("corrected_invoice_id")
-  creditNoteForId  String? @map("credit_note_for_id")
+  creditNoteForId    String? @map("credit_note_for_id")
 
   // Fichiers générés (archivage 10 ans — stockage objet R2/S3)
   facturxStorageKey String? @map("facturx_storage_key")
@@ -474,30 +475,30 @@ model Invoice {
   pdfStorageKey     String? @map("pdf_storage_key")
 
   // Transmission PA (Module C) — jamais direct, toujours via PA
-  platformConnectionId String? @map("platform_connection_id")
-  paReference          String? @map("pa_reference")
+  platformConnectionId String?               @map("platform_connection_id")
+  paReference          String?               @map("pa_reference")
   paStatus             PaTransmissionStatus? @map("pa_status")
   paStatusCode         String?               @map("pa_status_code")
   paStatusMessage      String?               @map("pa_status_message")
   lastPaStatusAt       DateTime?             @map("last_pa_status_at")
-  transmittedAt        DateTime? @map("transmitted_at")
+  transmittedAt        DateTime?             @map("transmitted_at")
 
   issuedAt  DateTime? @map("issued_at")
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
 
-  organization         Organization                  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  counterparty         Counterparty?                 @relation(fields: [counterpartyId], references: [id], onDelete: SetNull)
-  sellerEstablishment  OrganizationEstablishment?    @relation("SellerEstablishment", fields: [sellerEstablishmentId], references: [id], onDelete: SetNull)
-  buyerEstablishment   CounterpartyEstablishment?    @relation("BuyerEstablishment", fields: [buyerEstablishmentId], references: [id], onDelete: SetNull)
-  platformConnection   OrganizationPlatformConnection? @relation(fields: [platformConnectionId], references: [id], onDelete: SetNull)
-  lines                InvoiceLine[]
-  validations          InvoiceValidation[]
-  lifecycleEvents      InvoiceLifecycleEvent[]
-  eReportingEntries    EReportingEntry[]
-  archiveArtifacts     InvoiceArchiveArtifact[]
-  paInboxDocument      PaInboxDocument?
-  extraction           InvoiceExtraction?
+  organization        Organization                    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  counterparty        Counterparty?                   @relation(fields: [counterpartyId], references: [id], onDelete: SetNull)
+  sellerEstablishment OrganizationEstablishment?      @relation("SellerEstablishment", fields: [sellerEstablishmentId], references: [id], onDelete: SetNull)
+  buyerEstablishment  CounterpartyEstablishment?      @relation("BuyerEstablishment", fields: [buyerEstablishmentId], references: [id], onDelete: SetNull)
+  platformConnection  OrganizationPlatformConnection? @relation(fields: [platformConnectionId], references: [id], onDelete: SetNull)
+  lines               InvoiceLine[]
+  validations         InvoiceValidation[]
+  lifecycleEvents     InvoiceLifecycleEvent[]
+  eReportingEntries   EReportingEntry[]
+  archiveArtifacts    InvoiceArchiveArtifact[]
+  paInboxDocument     PaInboxDocument?
+  extraction          InvoiceExtraction?
 
   @@unique([organizationId, number])
   @@index([organizationId, sourceSystem, sourceExternalId])
@@ -634,20 +635,20 @@ enum ValidationSeverity {
 
 /// Référentiel des PA immatriculées DGFiP (liste officielle)
 model ApprovedPlatform {
-  id              String  @id @default(cuid())
-  slug            String  @unique
-  name            String
-  dgfipReference  String? @map("dgfip_reference")
-  websiteUrl      String? @map("website_url")
-  apiDocsUrl      String? @map("api_docs_url")
-  isActive        Boolean @default(true) @map("is_active")
+  id             String         @id @default(cuid())
+  slug           String         @unique
+  name           String
+  dgfipReference String?        @map("dgfip_reference")
+  websiteUrl     String?        @map("website_url")
+  apiDocsUrl     String?        @map("api_docs_url")
+  isActive       Boolean        @default(true) @map("is_active")
   /// Aide au choix (onboarding)
-  pricingHint     PaPricingHint @default(PAID) @map("pricing_hint")
-  audienceHint    PaAudienceHint @default(PME) @map("audience_hint")
+  pricingHint    PaPricingHint  @default(PAID) @map("pricing_hint")
+  audienceHint   PaAudienceHint @default(PME) @map("audience_hint")
   /// Tags reco : "free", "bank", "accounting", "tpe", "erp"…
-  recommendTags   String[] @default([]) @map("recommend_tags")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  recommendTags  String[]       @default([]) @map("recommend_tags")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
 
   connections OrganizationPlatformConnection[]
 
@@ -669,24 +670,26 @@ enum PaAudienceHint {
 }
 
 model OrganizationPlatformConnection {
-  id             String                   @id @default(cuid())
-  organizationId String                   @map("organization_id")
-  platformId     String                   @map("platform_id")
+  id             String                    @id @default(cuid())
+  organizationId String                    @map("organization_id")
+  platformId     String                    @map("platform_id")
   purpose        PlatformConnectionPurpose @default(BOTH)
   label          String?
-  credentialsRef String?                  @map("credentials_ref")
-  /** Secrets scellés / env (Qonto OAuth, clés API…) — jamais en clair côté client */
+  credentialsRef String?                   @map("credentials_ref")
+  /**
+   * Secrets scellés / env (Qonto OAuth, clés API…) — jamais en clair côté client
+   */
   metadata       Json?
-  isDefault      Boolean                  @default(false) @map("is_default")
-  isActive       Boolean                  @default(true) @map("is_active")
-  lastSyncAt     DateTime?                @map("last_sync_at")
-  createdAt      DateTime                 @default(now()) @map("created_at")
-  updatedAt      DateTime                 @updatedAt @map("updated_at")
+  isDefault      Boolean                   @default(false) @map("is_default")
+  isActive       Boolean                   @default(true) @map("is_active")
+  lastSyncAt     DateTime?                 @map("last_sync_at")
+  createdAt      DateTime                  @default(now()) @map("created_at")
+  updatedAt      DateTime                  @updatedAt @map("updated_at")
 
-  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  platform     ApprovedPlatform @relation(fields: [platformId], references: [id], onDelete: Restrict)
-  invoices          Invoice[]
-  paInboxDocuments  PaInboxDocument[]
+  organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  platform         ApprovedPlatform  @relation(fields: [platformId], references: [id], onDelete: Restrict)
+  invoices         Invoice[]
+  paInboxDocuments PaInboxDocument[]
 
   @@index([organizationId])
   @@map("organization_platform_connections")
@@ -699,13 +702,13 @@ enum PlatformConnectionPurpose {
 }
 
 model InvoiceLifecycleEvent {
-  id        String          @id @default(cuid())
-  invoiceId String          @map("invoice_id")
-  status    InvoiceStatus
-  scope     LifecycleScope  @default(EMISSION)
-  source    String          @default("system")
-  message   String?
-  metadata  Json?
+  id         String         @id @default(cuid())
+  invoiceId  String         @map("invoice_id")
+  status     InvoiceStatus
+  scope      LifecycleScope @default(EMISSION)
+  source     String         @default("system")
+  message    String?
+  metadata   Json?
   occurredAt DateTime       @default(now()) @map("occurred_at")
 
   invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
@@ -745,20 +748,20 @@ enum InvoiceArchiveKind {
 // ─── E-reporting (transactions B2C/étranger + paiements) ─────────────────────
 
 model EReportingEntry {
-  id             String          @id @default(cuid())
-  organizationId String          @map("organization_id")
-  invoiceId      String?         @map("invoice_id")
-  volut          ComplianceVolut
-  periodStart    DateTime        @map("period_start") @db.Date
-  periodEnd      DateTime        @map("period_end") @db.Date
-  payload        Json
-  transmittedAt  DateTime?       @map("transmitted_at")
-  paReference    String?         @map("pa_reference")
-  paStatus       PaTransmissionStatus? @map("pa_status")
-  paStatusCode   String?               @map("pa_status_code")
-  paStatusMessage String?              @map("pa_status_message")
-  lastPaStatusAt DateTime?             @map("last_pa_status_at")
-  createdAt      DateTime        @default(now()) @map("created_at")
+  id              String                @id @default(cuid())
+  organizationId  String                @map("organization_id")
+  invoiceId       String?               @map("invoice_id")
+  volut           ComplianceVolut
+  periodStart     DateTime              @map("period_start") @db.Date
+  periodEnd       DateTime              @map("period_end") @db.Date
+  payload         Json
+  transmittedAt   DateTime?             @map("transmitted_at")
+  paReference     String?               @map("pa_reference")
+  paStatus        PaTransmissionStatus? @map("pa_status")
+  paStatusCode    String?               @map("pa_status_code")
+  paStatusMessage String?               @map("pa_status_message")
+  lastPaStatusAt  DateTime?             @map("last_pa_status_at")
+  createdAt       DateTime              @default(now()) @map("created_at")
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   invoice      Invoice?     @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
@@ -790,9 +793,9 @@ model PaInboxDocument {
   createdAt            DateTime             @default(now()) @map("created_at")
   updatedAt            DateTime             @updatedAt @map("updated_at")
 
-  organization         Organization                  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  platformConnection   OrganizationPlatformConnection? @relation(fields: [platformConnectionId], references: [id], onDelete: SetNull)
-  invoice              Invoice?                      @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  organization       Organization                    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  platformConnection OrganizationPlatformConnection? @relation(fields: [platformConnectionId], references: [id], onDelete: SetNull)
+  invoice            Invoice?                        @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
 
   @@index([organizationId, receivedAt])
   @@index([organizationId, paReference])
@@ -800,15 +803,15 @@ model PaInboxDocument {
 }
 
 model PaymentReportingEntry {
-  id             String   @id @default(cuid())
-  organizationId String   @map("organization_id")
-  invoiceId      String?  @map("invoice_id")
-  amountReceived Decimal  @map("amount_received") @db.Decimal(14, 2)
-  receivedAt     DateTime @map("received_at")
-  vatAmount      Decimal? @map("vat_amount") @db.Decimal(14, 2)
+  id             String    @id @default(cuid())
+  organizationId String    @map("organization_id")
+  invoiceId      String?   @map("invoice_id")
+  amountReceived Decimal   @map("amount_received") @db.Decimal(14, 2)
+  receivedAt     DateTime  @map("received_at")
+  vatAmount      Decimal?  @map("vat_amount") @db.Decimal(14, 2)
   transmittedAt  DateTime? @map("transmitted_at")
-  paReference    String?  @map("pa_reference")
-  createdAt      DateTime @default(now()) @map("created_at")
+  paReference    String?   @map("pa_reference")
+  createdAt      DateTime  @default(now()) @map("created_at")
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
@@ -941,22 +944,22 @@ model OrganizationBridgeProfile {
   id             String @id @default(cuid())
   organizationId String @unique @map("organization_id")
 
-  hasExistingPa       Boolean @default(false) @map("has_existing_pa")
-  needsPaGuidance     Boolean @default(true) @map("needs_pa_guidance")
-  preferredPlatformSlug String? @map("preferred_platform_slug")
-  paPurpose           PlatformConnectionPurpose @default(BOTH) @map("pa_purpose")
+  hasExistingPa         Boolean                   @default(false) @map("has_existing_pa")
+  needsPaGuidance       Boolean                   @default(true) @map("needs_pa_guidance")
+  preferredPlatformSlug String?                   @map("preferred_platform_slug")
+  paPurpose             PlatformConnectionPurpose @default(BOTH) @map("pa_purpose")
 
   /// Providers choisis à l’inscription (SHOPIFY, WOOCOMMERCE, MANUAL_UPLOAD…)
-  sourceProviders     String[] @default([]) @map("source_providers")
-  monthlyInvoiceVolume Int?    @map("monthly_invoice_volume")
+  sourceProviders      String[] @default([]) @map("source_providers")
+  monthlyInvoiceVolume Int?     @map("monthly_invoice_volume")
 
-  intendedPlan        SubscriptionPlan @default(PRO) @map("intended_plan")
-  wantsCheckoutNow    Boolean @default(false) @map("wants_checkout_now")
+  intendedPlan     SubscriptionPlan @default(PRO) @map("intended_plan")
+  wantsCheckoutNow Boolean          @default(false) @map("wants_checkout_now")
 
-  onboardingStep      String?  @map("onboarding_step")
-  completedAt         DateTime? @map("completed_at")
-  createdAt           DateTime @default(now()) @map("created_at")
-  updatedAt           DateTime @updatedAt @map("updated_at")
+  onboardingStep String?   @map("onboarding_step")
+  completedAt    DateTime? @map("completed_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
@@ -965,19 +968,19 @@ model OrganizationBridgeProfile {
 
 /// Artefacts persistants (centre de tri) — chemin logique + contenu ou clé objet
 model StorageObject {
-  id             String           @id @default(cuid())
-  organizationId String           @map("organization_id")
-  invoiceId      String?          @map("invoice_id")
+  id             String            @id @default(cuid())
+  organizationId String            @map("organization_id")
+  invoiceId      String?           @map("invoice_id")
   kind           StorageObjectKind
-  storageKey     String           @map("storage_key")
+  storageKey     String            @map("storage_key")
   filename       String?
-  mimeType       String           @map("mime_type")
+  mimeType       String            @map("mime_type")
   /// Contenu inline (sandbox) — prod → objet S3/R2 + content null
-  content        String?          @db.Text
-  byteSize       Int              @default(0) @map("byte_size")
+  content        String?           @db.Text
+  byteSize       Int               @default(0) @map("byte_size")
   checksum       String?
   metadata       Json?
-  createdAt      DateTime         @default(now()) @map("created_at")
+  createdAt      DateTime          @default(now()) @map("created_at")
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
@@ -1000,19 +1003,19 @@ enum StorageObjectKind {
 
 /// File d’étapes du centre de tri (reprise + audit)
 model PipelineJob {
-  id             String              @id @default(cuid())
-  organizationId String              @map("organization_id")
-  invoiceId      String?             @map("invoice_id")
+  id             String            @id @default(cuid())
+  organizationId String            @map("organization_id")
+  invoiceId      String?           @map("invoice_id")
   direction      PipelineDirection
   stage          PipelineStage
-  status         PipelineJobStatus   @default(PENDING)
-  attempt        Int                 @default(0)
+  status         PipelineJobStatus @default(PENDING)
+  attempt        Int               @default(0)
   error          String?
   payload        Json?
   result         Json?
-  createdAt      DateTime            @default(now()) @map("created_at")
-  updatedAt      DateTime            @updatedAt @map("updated_at")
-  finishedAt     DateTime?           @map("finished_at")
+  createdAt      DateTime          @default(now()) @map("created_at")
+  updatedAt      DateTime          @updatedAt @map("updated_at")
+  finishedAt     DateTime?         @map("finished_at")
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 

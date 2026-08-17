@@ -3,8 +3,8 @@ set -e
 cd /opt/invoicepilot
 # shellcheck disable=SC1091
 set -a
-# shellcheck souce=/dev/null
-souce .env
+# shellcheck source=/dev/null
+source .env
 set +a
 
 echo "=== URLS ==="
@@ -12,7 +12,7 @@ echo "APP:   https://app.global-it-ss.com"
 echo "API:   https://api.global-it-ss.com"
 echo "WWW:   https://global-it-ss.com"
 echo "FILES: https://files.global-it-ss.com"
-echo "STRIPE WEBHOOK: https://app.global-it-ss.com/api/stipe/webhook"
+echo "STRIPE WEBHOOK: https://app.global-it-ss.com/api/stripe/webhook"
 echo
 echo "=== MINIO console ==="
 echo "USER: $MINIO_ROOT_USER"
@@ -23,19 +23,19 @@ echo "=== SMTP ==="
 echo "HOST: ${SMTP_HOST:-?} PORT: ${SMTP_PORT:-?} USER: ${SMTP_USER:-?}"
 echo
 echo "=== OLLAMA ==="
-docke ps --filte name=^invoicepilot-ollama$ --fomat 'containe={{.Names}} status={{.Status}}'
-docke exec invoicepilot-ollama ollama list 2>&1 || tue
+docker ps --filter name=^invoicepilot-ollama$ --format 'container={{.Names}} status={{.Status}}'
+docker exec invoicepilot-ollama ollama list 2>&1 || true
 echo "OLLAMA_BASE_URL (app): http://invoicepilot-ollama:11434"
 echo "OLLAMA_MODEL (app): qwen2.5:3b"
-echo "public: NON (éseau Docke intene seulement)"
+echo "public: NON (réseau Docker interne seulement)"
 echo
 echo "=== WORKER / BACKUP ==="
-docke ps --filte name=invoicepilot-woke --fomat 'woke={{.Names}} {{.Status}}' || tue
-docke ps --filte name=invoicepilot-db-backup --fomat 'backup={{.Names}} {{.Status}}' || tue
+docker ps --filter name=invoicepilot-worker --format 'worker={{.Names}} {{.Status}}' || true
+docker ps --filter name=invoicepilot-db-backup --format 'backup={{.Names}} {{.Status}}' || true
 echo
-echo "=== DB uses ==="
-docke exec invoicepilot-postges psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c \
-  'SELECT email, ole FROM "Use" ORDER BY "ceatedAt" NULLS LAST LIMIT 15;' 2>&1 || \
-docke exec invoicepilot-postges psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c \
-  'SELECT email FROM "Use" LIMIT 15;' 2>&1 || \
-echo "(table Use intouvable ou DB vide — utilise le compte démo seed local)"
+echo "=== DB users ==="
+docker exec invoicepilot-postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c \
+  'SELECT email, name, created_at FROM users ORDER BY created_at NULLS LAST LIMIT 15;' 2>&1 || \
+docker exec invoicepilot-postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c \
+  'SELECT email FROM users LIMIT 15;' 2>&1 || \
+echo "(table users introuvable ou DB vide — utilise le compte démo seed local)"

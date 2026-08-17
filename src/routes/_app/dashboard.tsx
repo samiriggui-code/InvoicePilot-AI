@@ -1,17 +1,20 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { CalendarClock, Network, Plug } from "lucide-react";
+import { useState } from "react";
 
 import { AppPageHero, AppPageShell } from "@/components/app/AppPageHero";
 import { PageGuide } from "@/components/app/PageGuide";
 import { DashboardApexCharts } from "@/components/dashboard/DashboardApexCharts";
 import { buildDashboardKpis } from "@/components/dashboard/DashboardKpis";
 import { InvoiceStatusDonut } from "@/components/dashboard/InvoiceStatusDonut";
-import { InvoiceTable } from "@/components/dashboard/InvoiceTable";
 import { ModuleCoverage } from "@/components/dashboard/ModuleCoverage";
 import { RecentActivityFeed } from "@/components/dashboard/RecentActivityFeed";
+import { ReceptionDataGrid } from "@/components/reception/ReceptionDataGrid";
+import { ReceptionDetailSheet } from "@/components/reception/ReceptionDetailSheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getDashboardData } from "@/fns/dashboard-data";
+import { importInboxDocument, getInboxData, markPurchaseReviewed } from "@/fns/pa-reception";
 import { pageGuide } from "@/lib/page-guides";
 import { cn } from "@/lib/utils";
 
@@ -19,12 +22,16 @@ export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({
     meta: [{ title: "Mon tableau de bord — InvoicePilot AI" }],
   }),
-  loader: () => getDashboardData(),
+  loader: () => Promise.all([getDashboardData(), getInboxData()]),
   component: DashboardPage,
 });
 
 function DashboardPage() {
-  const data = Route.useLoaderData();
+  const [data, inboxData] = Route.useLoaderData();
+  const router = useRouter();
+  const [busy, setBusy] = useState<string | null>(null);
+  const [sheetId, setSheetId] = useState<string | null>(null);
+  const [sheetKey, setSheetKey] = useState(0);
 
   if (!data) {
     return (
@@ -35,6 +42,21 @@ function DashboardPage() {
   }
 
   const next = data.readiness.nextActions[0];
+
+  async function onImport(documentId: string) {
+    setBusy("import-" + documentId);
+    await importInboxDocument({ data: { documentId } });
+    setBusy(null);
+    await router.invalidate();
+  }
+
+  async function onReview(invoiceId: string, action: "approve" | "refuse") {
+    setBusy(invoiceId + action);
+    await markPurchaseReviewed({ data: { invoiceId, action } });
+    setBusy(null);
+    await router.invalidate();
+    if (sheetId === invoiceId) setSheetKey((k) => k + 1);
+  }
 
   return (
     <AppPageShell>
@@ -136,7 +158,41 @@ function DashboardPage() {
         </div>
       ) : null}
 
-      <InvoiceTable invoices={data.recentInvoices} />
+      <section className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-xs">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-5 py-4 sm:px-6">
+          <div>
+            <h3 className="text-base font-semibold tracking-tight">Ma réception PA</h3>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              Dernières factures fournisseurs reçues via la plateforme agréée
+            </p>
+          </div>
+          <Button size="sm" variant="outline" asChild>
+            <Link to="/inbox">Ouvrir la réception →</Link>
+          </Button>
+        </div>
+        <div className="p-4 sm:p-5">
+          <ReceptionDataGrid
+            invoices={inboxData?.invoices ?? []}
+            busy={busy}
+            onOpen={setSheetId}
+            onImport={(documentId) => void onImport(documentId)}
+            onReview={(invoiceId, action) => void onReview(invoiceId, action)}
+          />
+        </div>
+      </section>
+
+      <ReceptionDetailSheet
+        key={`${sheetId}-${sheetKey}`}
+        invoiceId={sheetId}
+        open={Boolean(sheetId)}
+        onOpenChange={(open) => {
+          if (!open) setSheetId(null);
+        }}
+        onReview={(id, action) => void onReview(id, action)}
+        reviewing={
+          busy === `${sheetId}approve` ? "approve" : busy === `${sheetId}refuse` ? "refuse" : null
+        }
+      />
 
       <PageGuide page="dashboard" />
     </AppPageShell>

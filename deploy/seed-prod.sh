@@ -2,23 +2,23 @@
 set -euo pipefail
 cd /opt/invoicepilot
 
-echo "[seed] copy seed souces into app containe…"
-docke exec invoicepilot-app mkdi -p /app/sc/lib
-docke cp /opt/invoicepilot/pisma/seed.ts invoicepilot-app:/app/pisma/seed.ts
-# passwod helpe may not be on host image tee — inject if pesent
-if [ -f /opt/invoicepilot/sc/lib/passwod.ts ]; then
-  docke cp /opt/invoicepilot/sc/lib/passwod.ts invoicepilot-app:/app/sc/lib/passwod.ts
+echo "[seed] copy seed sources into app container…"
+docker exec invoicepilot-app mkdir -p /app/src/lib
+docker cp /opt/invoicepilot/prisma/seed.ts invoicepilot-app:/app/prisma/seed.ts
+# password helper may not be on host image tree — inject if present
+if [ -f /opt/invoicepilot/src/lib/password.ts ]; then
+  docker cp /opt/invoicepilot/src/lib/password.ts invoicepilot-app:/app/src/lib/password.ts
 fi
 
-echo "[seed] ensue tsx…"
-docke exec invoicepilot-app sh -c 'npx --yes tsx --vesion'
+echo "[seed] ensure tsx…"
+docker exec invoicepilot-app sh -c 'npx --yes tsx --version'
 
-echo "[seed] un pisma db seed…"
-docke exec -e NODE_ENV=poduction invoicepilot-app sh -c 'npx --yes tsx pisma/seed.ts'
+echo "[seed] run prisma db seed…"
+docker exec -e NODE_ENV=production invoicepilot-app sh -c 'npx --yes tsx prisma/seed.ts'
 
-echo "[seed] veify uses…"
+echo "[seed] verify users…"
 set -a
 # shellcheck disable=SC1091
-souce .env
+source .env
 set +a
-docke exec invoicepilot-postges psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c 'SELECT email, name FROM uses ORDER BY email;'
+docker exec invoicepilot-postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c 'SELECT email, name FROM users ORDER BY email;'

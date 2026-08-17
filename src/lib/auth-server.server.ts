@@ -178,6 +178,51 @@ export async function destroyAuthSession(): Promise<void> {
   clearSessionCookie();
 }
 
+/** Verrouille la session en cours (poste inattendu, pause) sans se déconnecter. */
+export async function lockCurrentSession(): Promise<void> {
+  const token = readSessionToken();
+  if (!token) return;
+
+  await db.authSession.updateMany({
+    where: { tokenHash: sha256(token) },
+    data: { lockedAt: new Date() },
+  });
+}
+
+export async function isCurrentSessionLocked(): Promise<boolean> {
+  const token = readSessionToken();
+  if (!token) return false;
+
+  const session = await db.authSession.findUnique({
+    where: { tokenHash: sha256(token) },
+    select: { lockedAt: true },
+  });
+  return Boolean(session?.lockedAt);
+}
+
+/** Ressaisie du mot de passe pour lever le verrou — ne recrée pas de session. */
+export async function unlockCurrentSession(
+  password: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const token = readSessionToken();
+  if (!token) return { ok: false, error: "Session expirée." };
+
+  const session = await db.authSession.findUnique({
+    where: { tokenHash: sha256(token) },
+    include: { user: true },
+  });
+  if (!session || session.expiresAt < new Date()) {
+    return { ok: false, error: "Session expirée." };
+  }
+
+  if (!session.user.passwordHash || !(await verifyPassword(password, session.user.passwordHash))) {
+    return { ok: false, error: "Mot de passe incorrect." };
+  }
+
+  await db.authSession.update({ where: { id: session.id }, data: { lockedAt: null } });
+  return { ok: true };
+}
+
 export async function registerUser(input: {
   name: string;
   email: string;

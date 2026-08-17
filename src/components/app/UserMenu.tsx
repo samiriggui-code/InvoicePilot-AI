@@ -3,7 +3,6 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 
 import { KeenIcon } from "@/components/keenicons";
-import { useTheme } from "@/components/theme/ThemeProvider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -14,41 +13,32 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { logoutUser } from "@/fns/auth";
+import { lockSession, logoutUser } from "@/fns/auth";
 import { listMemberships, switchOrganization, type MembershipItem } from "@/fns/cabinet";
 import { getNotificationCounts } from "@/fns/notifications";
 import { resolveUserAvatar } from "@/lib/media";
 import { planLabel, type WorkspaceContext } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-function CountBadge({ count }: { count: number }) {
-  if (count <= 0) return null;
-  return (
-    <span className="ms-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
-      {count > 99 ? "99+" : count}
-    </span>
-  );
-}
-
 export function UserMenu({
   workspace,
   className,
   collapsed = false,
+  dropdownSide = "bottom",
 }: {
   workspace: WorkspaceContext;
   className?: string;
   collapsed?: boolean;
+  dropdownSide?: "top" | "bottom";
 }) {
   const navigate = useNavigate();
   const router = useRouter();
   const listFn = useServerFn(listMemberships);
   const switchFn = useServerFn(switchOrganization);
   const countsFn = useServerFn(getNotificationCounts);
-  const { resolvedTheme, setTheme } = useTheme();
   const plan = workspace.subscription?.plan;
   const [memberships, setMemberships] = useState<MembershipItem[]>([]);
   const [unread, setUnread] = useState(0);
-  const [alerts, setAlerts] = useState(0);
   const initials = (workspace.user.name || workspace.user.email)
     .split(/\s+/)
     .map((p) => p[0])
@@ -74,11 +64,9 @@ export function UserMenu({
     void (async () => {
       try {
         const c = await countsFn();
-        setUnread(c.unread);
-        setAlerts(c.alerts);
+        setUnread(c.unread + c.alerts);
       } catch {
         setUnread(0);
-        setAlerts(0);
       }
     })();
   }, [countsFn, workspace.organization.id, workspace.user.id]);
@@ -86,6 +74,11 @@ export function UserMenu({
   async function handleLogout() {
     await logoutUser();
     await navigate({ to: "/login" });
+  }
+
+  async function handleLock() {
+    await lockSession();
+    await navigate({ to: "/session-locked" });
   }
 
   async function handleSwitch(organizationId: string) {
@@ -130,7 +123,7 @@ export function UserMenu({
           </>
         )}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" side="top" className="w-72" sideOffset={8}>
+      <DropdownMenuContent align="end" side={dropdownSide} className="w-72" sideOffset={8}>
         <DropdownMenuLabel className="font-normal">
           <div className="flex items-center gap-3">
             <Avatar className="size-10">
@@ -177,23 +170,6 @@ export function UserMenu({
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
-            <Link to="/notifications" search={{ view: "all" }} className="gap-2">
-              <KeenIcon icon="notification-status" className="text-base" />
-              <span className="flex-1">Notifications</span>
-              <CountBadge count={unread} />
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link to="/notifications" search={{ view: "alerts" }} className="gap-2">
-              <KeenIcon icon="information-2" className="text-base" />
-              <span className="flex-1">Alertes</span>
-              <CountBadge count={alerts} />
-            </Link>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
             <Link to="/profile">
               <KeenIcon icon="user" className="text-base" />
               Mon profil
@@ -219,14 +195,6 @@ export function UserMenu({
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}>
-          {resolvedTheme === "dark" ? (
-            <KeenIcon icon="sun" className="text-base" />
-          ) : (
-            <KeenIcon icon="moon" className="text-base" />
-          )}
-          {resolvedTheme === "dark" ? "Thème clair" : "Thème sombre"}
-        </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <a href="/" target="_blank" rel="noreferrer">
             <KeenIcon icon="exit-right" className="text-base" />
@@ -234,6 +202,10 @@ export function UserMenu({
           </a>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => void handleLock()}>
+          <KeenIcon icon="lock" className="text-base" />
+          Verrouiller la session
+        </DropdownMenuItem>
         <DropdownMenuItem
           className="text-destructive focus:bg-destructive/10 focus:text-destructive"
           onClick={() => void handleLogout()}

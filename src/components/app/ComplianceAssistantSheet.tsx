@@ -1,5 +1,5 @@
 import { useServerFn } from "@tanstack/react-start";
-import { BookOpen, Loader2, Scale, Send, Sparkles } from "lucide-react";
+import { BookOpen, Loader2, Scale, Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,11 @@ import { cn } from "@/lib/utils";
 
 const TOPICS = [
   {
+    label: "1er septembre 2026",
+    prompt:
+      "Que dois-je faire avant le 1er septembre 2026 pour la facturation électronique, et où dans InvoicePilot ?",
+  },
+  {
     label: "Calendrier 2026 / 2027",
     prompt: "Quelles sont mes échéances de facturation électronique selon la taille d'entreprise ?",
   },
@@ -34,6 +39,11 @@ const TOPICS = [
     label: "E-reporting",
     prompt: "Quand dois-je faire du e-reporting de transaction ou de paiement ?",
   },
+  {
+    label: "Parcours dans l'app",
+    prompt:
+      "Quel parcours suivi dans InvoicePilot pour préparer mes factures (Sources, Analyse, Émission, Réception) ?",
+  },
 ] as const;
 
 type AssistantSheetProps = {
@@ -47,7 +57,7 @@ export function ComplianceAssistantSheet({ open, onOpenChange }: AssistantSheetP
     {
       role: "assistant",
       content:
-        "Assistant réglementaire InvoicePilot — base juridique facturation électronique (DGFiP / économie.gouv).\n\nJe m’appuie sur le calendrier légal, les mentions obligatoires 2026, les formats EN 16931 et le rôle des plateformes agréées.\n\n**Ceci n’est pas un conseil fiscal.** En cas de doute : expert-comptable ou assistance nationale **0 806 807 807**.",
+        "Assistant réglementaire InvoicePilot — **base de connaissances** e-facture (1er septembre 2026/2027) + parcours app.\n\nJe réponds même si l’IA locale est indisponible. Je m’appuie sur le calendrier légal, les mentions 2026, les formats EN 16931 et le rôle des PA. Je vous oriente vers Conformité, Sources, Analyse, Émission ou Réception — **je n’exécute aucune action**.\n\n**Ceci n’est pas un conseil fiscal.** En cas de doute : expert-comptable ou **0 806 807 807**.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -80,7 +90,7 @@ export function ComplianceAssistantSheet({ open, onOpenChange }: AssistantSheetP
         {
           role: "assistant",
           content:
-            "Impossible de consulter la base pour le moment. Réessayez, ou contactez votre expert-comptable / **0 806 807 807**.",
+            "Impossible de répondre pour le moment. Réessayez, ou contactez votre expert-comptable / **0 806 807 807**.",
         },
       ]);
     } finally {
@@ -92,7 +102,8 @@ export function ComplianceAssistantSheet({ open, onOpenChange }: AssistantSheetP
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="flex w-full flex-col gap-0 border-l border-border/80 p-0 sm:max-w-md"
+        style={{ top: "1.25rem", right: "1.25rem", bottom: "1.25rem", left: "auto" }}
+        className="flex h-auto w-full flex-col gap-0 overflow-hidden rounded-xl border-0 p-0 shadow-2xl sm:max-w-md"
       >
         <SheetHeader className="space-y-1 border-b border-border/60 bg-muted/25 px-5 py-4 text-left">
           <div className="flex items-center gap-2">
@@ -103,11 +114,13 @@ export function ComplianceAssistantSheet({ open, onOpenChange }: AssistantSheetP
               <SheetTitle className="text-base">Assistant réglementaire</SheetTitle>
               <SheetDescription className="text-xs">
                 Législation e-facture · PA · e-reporting
-                {source === "openai"
-                  ? " · enrichi IA"
-                  : source === "knowledge-base"
-                    ? " · base juridique locale"
-                    : ""}
+                {source === "ollama"
+                  ? " · Ollama"
+                  : source === "openai"
+                    ? " · OpenAI"
+                    : source === "knowledge-base"
+                      ? " · base locale"
+                      : ""}
               </SheetDescription>
             </div>
           </div>
@@ -202,21 +215,6 @@ export function ComplianceAssistantSheet({ open, onOpenChange }: AssistantSheetP
         </div>
       </SheetContent>
     </Sheet>
-  );
-}
-
-export function AssistantFab({ onClick }: { onClick: () => void }) {
-  return (
-    <Button
-      type="button"
-      size="lg"
-      onClick={onClick}
-      className="fixed bottom-5 right-5 z-40 h-12 gap-2 rounded-full px-4 shadow-lg shadow-primary/20"
-    >
-      <Sparkles className="size-4" />
-      <span className="hidden sm:inline">Assistant juridique</span>
-      <span className="sm:hidden">Aide</span>
-    </Button>
   );
 }
 

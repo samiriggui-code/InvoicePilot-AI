@@ -1,6 +1,6 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { KeyRound, Loader2, ShieldCheck } from "lucide-react";
+import { KeyRound, Loader2, Pencil, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -8,6 +8,14 @@ import { Badge } from "@/components/reui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { updateProfile } from "@/fns/auth";
@@ -23,6 +31,7 @@ export function UserProfileView({ workspace }: { workspace: WorkspaceContext }) 
   const [name, setName] = useState(workspace.user.name);
   const [avatarKey, setAvatarKey] = useState<string | null>(workspace.user.avatarKey);
   const [saving, setSaving] = useState(false);
+  const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
 
   useEffect(() => {
     setName(workspace.user.name);
@@ -69,64 +78,92 @@ export function UserProfileView({ workspace }: { workspace: WorkspaceContext }) 
         <CardContent>
           <form className="grid gap-6" onSubmit={(e) => void handleSave(e)}>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-              <Avatar className="size-20 shrink-0 ring-2 ring-border">
-                <AvatarImage src={previewSrc} alt={name} />
-                <AvatarFallback className="text-lg">{initials}</AvatarFallback>
-              </Avatar>
-              <div className="min-w-0 flex-1 space-y-3">
-                <div>
-                  <Label className="text-muted-foreground">Avatar</Label>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Choisissez une photo parmi la galerie Metronic, ou laissez l’avatar automatique
-                    basé sur votre e-mail.
-                  </p>
-                </div>
-                <div className="grid max-h-48 grid-cols-6 gap-2 overflow-y-auto rounded-lg border border-border bg-muted/20 p-2 sm:grid-cols-8 md:grid-cols-10">
-                  <button
-                    type="button"
-                    title="Automatique (e-mail)"
-                    onClick={() => setAvatarKey(null)}
-                    className={cn(
-                      "relative aspect-square overflow-hidden rounded-full border-2 transition-all",
-                      avatarKey === null
-                        ? "border-primary ring-2 ring-primary/30"
-                        : "border-transparent opacity-80 hover:opacity-100",
-                    )}
-                  >
-                    <img
-                      src={resolveUserAvatar({
-                        email: workspace.user.email,
-                        avatarKey: null,
-                      })}
-                      alt="Auto"
-                      className="size-full object-cover"
-                    />
-                    <span className="absolute inset-x-0 bottom-0 bg-background/80 py-0.5 text-center text-[8px] font-medium">
-                      Auto
-                    </span>
-                  </button>
-                  {AVATAR_PRESETS.map((key) => (
+              <div className="relative shrink-0">
+                <Avatar className="size-20 ring-2 ring-border">
+                  <AvatarImage src={previewSrc} alt={name} />
+                  <AvatarFallback className="text-lg">{initials}</AvatarFallback>
+                </Avatar>
+                <Dialog open={avatarDialogOpen} onOpenChange={setAvatarDialogOpen}>
+                  <DialogTrigger asChild>
                     <button
-                      key={key}
                       type="button"
-                      title={key}
-                      onClick={() => setAvatarKey(key)}
-                      className={cn(
-                        "aspect-square overflow-hidden rounded-full border-2 transition-all",
-                        avatarKey === key
-                          ? "border-primary ring-2 ring-primary/30"
-                          : "border-transparent opacity-80 hover:opacity-100",
-                      )}
+                      title="Changer l’avatar"
+                      className="absolute -bottom-1 -right-1 flex size-7 items-center justify-center rounded-full border-2 border-background bg-primary text-primary-foreground shadow-sm transition-transform hover:scale-105"
                     >
-                      <img
-                        src={media.avatarByKey(key)}
-                        alt={key}
-                        className="size-full object-cover"
-                        loading="lazy"
-                      />
+                      <Pencil className="size-3.5" />
                     </button>
-                  ))}
-                </div>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-lg">
+                    <DialogHeader>
+                      <DialogTitle>Choisir un avatar</DialogTitle>
+                      <DialogDescription>
+                        Sélectionnez une photo dans la galerie Metronic, ou laissez l’avatar
+                        automatique basé sur votre e-mail.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid max-h-80 grid-cols-6 gap-2 overflow-y-auto rounded-lg border border-border bg-muted/20 p-2 sm:grid-cols-8">
+                      <button
+                        type="button"
+                        title="Automatique (e-mail)"
+                        onClick={() => {
+                          setAvatarKey(null);
+                          setAvatarDialogOpen(false);
+                        }}
+                        className={cn(
+                          "relative aspect-square overflow-hidden rounded-full border-2 transition-all",
+                          avatarKey === null
+                            ? "border-primary ring-2 ring-primary/30"
+                            : "border-transparent opacity-80 hover:opacity-100",
+                        )}
+                      >
+                        <img
+                          src={resolveUserAvatar({
+                            email: workspace.user.email,
+                            avatarKey: null,
+                          })}
+                          alt="Auto"
+                          className="size-full object-cover"
+                        />
+                        <span className="absolute inset-x-0 bottom-0 bg-background/80 py-0.5 text-center text-[8px] font-medium">
+                          Auto
+                        </span>
+                      </button>
+                      {AVATAR_PRESETS.map((key) => (
+                        <button
+                          key={key}
+                          type="button"
+                          title={key}
+                          onClick={() => {
+                            setAvatarKey(key);
+                            setAvatarDialogOpen(false);
+                          }}
+                          className={cn(
+                            "aspect-square overflow-hidden rounded-full border-2 transition-all",
+                            avatarKey === key
+                              ? "border-primary ring-2 ring-primary/30"
+                              : "border-transparent opacity-80 hover:opacity-100",
+                          )}
+                        >
+                          <img
+                            src={media.avatarByKey(key)}
+                            alt={key}
+                            className="size-full object-cover"
+                            loading="lazy"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+              <div className="min-w-0 flex-1 space-y-1">
+                <Label className="text-muted-foreground">Avatar</Label>
+                <p className="text-xs text-muted-foreground">
+                  {avatarKey
+                    ? "Photo personnalisée choisie."
+                    : "Avatar automatique basé sur votre e-mail."}{" "}
+                  Cliquez sur le crayon pour en changer.
+                </p>
               </div>
             </div>
 

@@ -25,7 +25,7 @@ function ProfilePage() {
   const org = workspace.organization;
 
   return (
-    <AppPageShell className="max-w-3xl">
+    <AppPageShell>
       <div className="flex flex-col gap-5 lg:gap-7">
         <Toolbar>
           <ToolbarHeading>

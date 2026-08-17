@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SessionLockedRouteImport } from './routes/session-locked'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
@@ -56,6 +57,11 @@ import { Route as AppTeamMembersMembershipIdRouteImport } from './routes/_app/te
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SessionLockedRoute = SessionLockedRouteImport.update({
+  id: '/session-locked',
+  path: '/session-locked',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -275,6 +281,7 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/session-locked': typeof SessionLockedRoute
   '/signup': typeof SignupRoute
   '/agent': typeof AppAgentRoute
   '/billing': typeof AppBillingRouteWithChildren
@@ -318,6 +325,7 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/session-locked': typeof SessionLockedRoute
   '/signup': typeof SignupRoute
   '/agent': typeof AppAgentRoute
   '/clients': typeof AppClientsRouteWithChildren
@@ -360,6 +368,7 @@ export interface FileRoutesById {
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/session-locked': typeof SessionLockedRoute
   '/signup': typeof SignupRoute
   '/_app/agent': typeof AppAgentRoute
   '/_app/billing': typeof AppBillingRouteWithChildren
@@ -406,6 +415,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/login'
     | '/reset-password'
+    | '/session-locked'
     | '/signup'
     | '/agent'
     | '/billing'
@@ -449,6 +459,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/login'
     | '/reset-password'
+    | '/session-locked'
     | '/signup'
     | '/agent'
     | '/clients'
@@ -490,6 +501,7 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/login'
     | '/reset-password'
+    | '/session-locked'
     | '/signup'
     | '/_app/agent'
     | '/_app/billing'
@@ -536,6 +548,7 @@ export interface RootRouteChildren {
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  SessionLockedRoute: typeof SessionLockedRoute
   SignupRoute: typeof SignupRoute
   CheckoutSuccessRoute: typeof CheckoutSuccessRoute
   InviteTokenRoute: typeof InviteTokenRoute
@@ -548,6 +561,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/session-locked': {
+      id: '/session-locked'
+      path: '/session-locked'
+      fullPath: '/session-locked'
+      preLoaderRoute: typeof SessionLockedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -996,6 +1016,7 @@ const rootRouteChildren: RootRouteChildren = {
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  SessionLockedRoute: SessionLockedRoute,
   SignupRoute: SignupRoute,
   CheckoutSuccessRoute: CheckoutSuccessRoute,
   InviteTokenRoute: InviteTokenRoute,

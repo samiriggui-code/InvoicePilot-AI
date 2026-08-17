@@ -23,22 +23,32 @@ export function AiStatusBadge({ analyzing = false, className, pollMs = 15000 }: 
 
   useEffect(() => {
     let cancelled = false;
+    let failStreak = 0;
 
     async function refresh() {
       try {
         const next = await statusFn();
-        if (!cancelled) setStatus(next);
+        if (cancelled) return;
+        failStreak = 0;
+        setStatus(next);
       } catch {
-        if (!cancelled) {
-          setStatus({
-            enabled: true,
-            online: false,
-            model: null,
-            baseUrlHost: null,
-            latencyMs: null,
-            checkedAt: new Date().toISOString(),
-            error: "Statut IA indisponible",
-          });
+        if (cancelled) return;
+        failStreak += 1;
+        setStatus({
+          enabled: true,
+          online: false,
+          model: null,
+          baseUrlHost: null,
+          latencyMs: null,
+          checkedAt: new Date().toISOString(),
+          error:
+            failStreak >= 2
+              ? "Session Vite obsolète — rechargez la page (Ctrl+Shift+R)"
+              : "Statut IA indisponible",
+        });
+        // Après restart HMR : IDs server-fn invalides → arrêter le poll pour éviter le spam logs
+        if (failStreak >= 2) {
+          window.clearInterval(id);
         }
       }
     }

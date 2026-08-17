@@ -1,14 +1,19 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { MessageCircle } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 import { AppLogo, AppMiniLogo } from "@/components/app/AppLogo";
-import { AssistantFab, ComplianceAssistantSheet } from "@/components/app/ComplianceAssistantSheet";
+import { ComplianceAssistantSheet } from "@/components/app/ComplianceAssistantSheet";
+import { NotificationsSheet } from "@/components/app/NotificationsSheet";
 import { UserMenu } from "@/components/app/UserMenu";
 import { TrialLifecycleDialogs } from "@/components/billing/TrialLifecycleDialogs";
 import { KeenIcon } from "@/components/keenicons";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
+import { getNotificationCounts } from "@/fns/notifications";
 import { media } from "@/lib/media";
 import { planLabel, type WorkspaceContext } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -59,6 +64,15 @@ function trialBadgeLabel(days: number) {
   return `Essai ${days} JOUR${days > 1 ? "S" : ""}`;
 }
 
+function HeaderCountBadge({ count }: { count: number }) {
+  if (count <= 0) return null;
+  return (
+    <span className="pointer-events-none absolute -end-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-semibold text-primary-foreground">
+      {count > 99 ? "99+" : count}
+    </span>
+  );
+}
+
 export function AppShell({
   workspace,
   children,
@@ -69,10 +83,22 @@ export function AppShell({
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [assistantOpen, setAssistantOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [unread, setUnread] = useState(0);
+  const [notifOpen, setNotifOpen] = useState(false);
   const orgName = workspace.organization.tradeName ?? workspace.organization.legalName;
   const plan = workspace.subscription?.plan;
   const isTrialing = workspace.subscription?.status === "TRIALING";
   const trialDays = workspace.trialDaysLeft;
+  const countsFn = useServerFn(getNotificationCounts);
+
+  const refreshCounts = useCallback(async () => {
+    try {
+      const c = await countsFn();
+      setUnread(c.unread);
+    } catch {
+      setUnread(0);
+    }
+  }, [countsFn]);
 
   useEffect(() => {
     try {
@@ -81,6 +107,10 @@ export function AppShell({
       /* ignore */
     }
   }, []);
+
+  useEffect(() => {
+    void refreshCounts();
+  }, [refreshCounts, workspace.organization.id, workspace.user.id]);
 
   function toggleCollapsed() {
     setCollapsed((prev) => {
@@ -233,13 +263,33 @@ export function AppShell({
             </div>
           ))}
         </nav>
-
-        <div className={cn("border-t border-border/60 p-2.5", collapsed && "flex justify-center")}>
-          <UserMenu workspace={workspace} collapsed={collapsed} />
-        </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-40 hidden h-14 shrink-0 items-center justify-end gap-1 border-b border-border/60 bg-background/90 px-4 backdrop-blur md:flex">
+          <span className="relative inline-flex">
+            <button
+              type="button"
+              title="Notifications"
+              onClick={() => setNotifOpen(true)}
+              className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+            >
+              <KeenIcon icon="notification-status" className="text-base" />
+            </button>
+            <HeaderCountBadge count={unread} />
+          </span>
+          <button
+            type="button"
+            title="Assistant juridique"
+            onClick={() => setAssistantOpen(true)}
+            className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+          >
+            <MessageCircle className="size-4.5" />
+          </button>
+          <ThemeToggle />
+          <UserMenu workspace={workspace} collapsed />
+        </header>
+
         <header className="sticky top-0 z-40 flex h-14 items-center justify-between gap-3 border-b border-border/60 bg-background/90 px-3 backdrop-blur md:hidden">
           <div className="flex min-w-0 items-center gap-2">
             <AppMiniLogo className="size-7" />
@@ -250,7 +300,29 @@ export function AppShell({
               </Badge>
             )}
           </div>
-          <UserMenu workspace={workspace} className="w-auto border-none px-1" />
+          <div className="flex shrink-0 items-center gap-0.5">
+            <span className="relative inline-flex">
+              <button
+                type="button"
+                title="Notifications"
+                onClick={() => setNotifOpen(true)}
+                className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+              >
+                <KeenIcon icon="notification-status" className="text-base" />
+              </button>
+              <HeaderCountBadge count={unread} />
+            </span>
+            <button
+              type="button"
+              title="Assistant juridique"
+              onClick={() => setAssistantOpen(true)}
+              className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+            >
+              <MessageCircle className="size-4.5" />
+            </button>
+            <ThemeToggle />
+            <UserMenu workspace={workspace} className="w-auto border-none px-1" />
+          </div>
         </header>
 
         <nav className="flex gap-1 overflow-x-auto border-b border-border/60 px-2 py-2 md:hidden">
@@ -274,8 +346,12 @@ export function AppShell({
         <div className="min-w-0 flex-1 overflow-x-hidden pb-20">{children}</div>
       </div>
 
-      <AssistantFab onClick={() => setAssistantOpen(true)} />
       <ComplianceAssistantSheet open={assistantOpen} onOpenChange={setAssistantOpen} />
+      <NotificationsSheet
+        open={notifOpen}
+        onOpenChange={setNotifOpen}
+        onChanged={() => void refreshCounts()}
+      />
       <TrialLifecycleDialogs workspace={workspace} />
       <Toaster position="top-right" richColors closeButton />
     </div>

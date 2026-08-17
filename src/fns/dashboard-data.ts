@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 
+import { formatAuditActionLabel } from "@/lib/audit-labels";
 import type { DashboardData } from "@/lib/types";
 
 const VALID_STATUSES = [
@@ -391,7 +392,7 @@ export const getDashboardData = createServerFn({ method: "GET" }).handler(
 
     const recentActivity = auditLogs.map((log) => ({
       id: log.id,
-      label: formatDashboardAuditLabel(log.action, log.entityType),
+      label: formatAuditActionLabel(log.action, log.entityType),
       action: log.action,
       createdAt: log.createdAt.toISOString(),
       actor: log.user?.name ?? log.user?.email ?? null,
@@ -460,27 +461,3 @@ export const getDashboardData = createServerFn({ method: "GET" }).handler(
     };
   },
 );
-
-function formatDashboardAuditLabel(action: string, entityType: string | null): string {
-  const map: Record<string, string> = {
-    "team.member_joined": "Membre a rejoint l’organisation",
-    "team.role_updated": "Rôle membre mis à jour",
-    "team.member_archived": "Membre archivé",
-    "team.member_restored": "Membre restauré",
-    "team.member_removed": "Membre retiré",
-    "api_key.created": "Clé API créée",
-    "api_key.revoked": "Clé API révoquée",
-    "integration.connected": "Source / intégration connectée",
-    "integration.disconnected": "Source / intégration déconnectée",
-    "invoice.created": "Facture créée",
-    "invoice.updated": "Facture mise à jour",
-    "invoice.validated": "Facture validée",
-    "client.created": "Acheteur ajouté",
-    "client.updated": "Acheteur mis à jour",
-    "platform.connected": "PA connectée",
-    "e_reporting.created": "Entrée e-reporting",
-  };
-  if (map[action]) return map[action];
-  if (entityType) return `${action.replace(/\./g, " · ")} (${entityType})`;
-  return action;
-}

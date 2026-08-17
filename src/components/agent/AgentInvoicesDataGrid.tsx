@@ -102,6 +102,7 @@ export function AgentInvoicesDataGrid({
 
   async function runAnalyze(invoiceId: string) {
     if (busyId) return;
+    setSheetId(invoiceId);
     setBusyId(invoiceId);
     setError(null);
     try {
@@ -114,9 +115,9 @@ export function AgentInvoicesDataGrid({
             () =>
               resolve({
                 error:
-                  "Analyse trop longue (timeout 60s). Ollama peut charger le modèle — réessayez, ou désactivez LLM_EXTRACT_ENABLED pour l’heuristique seule.",
+                  "Analyse trop longue (timeout 120s). Ollama charge souvent le modèle au 1er appel (~40s) — réessayez à chaud, ou désactivez LLM_EXTRACT_ENABLED pour l’heuristique seule.",
               }),
-            60_000,
+            120_000,
           ),
         ),
       ]);

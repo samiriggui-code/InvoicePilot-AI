@@ -17,11 +17,15 @@ export type AnalysisDetailSheet = {
   analyzed: boolean;
   /** Cible de dispatch post-analyse */
   dispatch: "emission" | "e-reporting" | "blocked" | "review";
+  /** Motif bloquant structuré (UI dédiée) */
+  blockCode: string | null;
   nextAction: {
     label: string;
     hint: string;
     href: string | null;
   };
+  /** CTAs secondaires (ex. mismatch SIREN → Sources / Paramètres) */
+  secondaryActions: { label: string; href: string }[];
   validations: {
     id: string;
     code: string;
@@ -66,39 +70,73 @@ function dispatchFor(
   return "emission";
 }
 
-function nextActionFor(verdict: AnalysisQueueVerdict, invoiceId: string, transactionType: string) {
+function nextActionFor(
+  verdict: AnalysisQueueVerdict,
+  invoiceId: string,
+  transactionType: string,
+  blockCode: string | null,
+): {
+  nextAction: AnalysisDetailSheet["nextAction"];
+  secondaryActions: AnalysisDetailSheet["secondaryActions"];
+} {
+  if (blockCode === "SELLER_SIREN_MISMATCH") {
+    return {
+      nextAction: {
+        label: "Aller en Réception",
+        hint: "Facture d’un autre émetteur = achat / fournisseur. Données métier non enregistrées ici.",
+        href: "/inbox",
+      },
+      secondaryActions: [
+        { label: "Remplacer le PDF (Sources)", href: "/integrations" },
+        { label: "Vérifier SIREN organisation", href: "/settings" },
+      ],
+    };
+  }
+
   const ereporting = isEReportingTransaction(transactionType as TransactionType);
   switch (verdict) {
     case "A_ANALYSER":
       return {
-        label: "Lancer l’analyse IA",
-        hint: "Extraction + segmentation B2B / B2C + contrôles avant dispatch.",
-        href: null as string | null,
+        nextAction: {
+          label: "Lancer l’analyse IA",
+          hint: "Extraction + segmentation B2B / B2C + contrôles avant dispatch.",
+          href: null,
+        },
+        secondaryActions: [],
       };
     case "BLOQUE":
       return {
-        label: "Rester sur Analyse IA",
-        hint: "Corrigez ici (sheet) puis Relancer — pas d’émission tant que bloqué.",
-        href: "/agent",
+        nextAction: {
+          label: "Rester sur Analyse IA",
+          hint: "Corrigez ici (sheet) puis Relancer — pas d’émission tant que bloqué.",
+          href: "/agent",
+        },
+        secondaryActions: [],
       };
     case "A_VALIDER":
       return {
-        label: "Rester sur Analyse IA",
-        hint: "Complétez / relancez ici — dispatch seulement après Passé.",
-        href: "/agent",
+        nextAction: {
+          label: "Rester sur Analyse IA",
+          hint: "Complétez / relancez ici — dispatch seulement après Passé.",
+          href: "/agent",
+        },
+        secondaryActions: [],
       };
     case "PASSE":
-      return ereporting
-        ? {
-            label: "Ouvrir E-reporting",
-            hint: "Flux B2C / export / intra-UE — à regrouper dans un lot périodique.",
-            href: "/e-reporting",
-          }
-        : {
-            label: "Ouvrir Émission PA",
-            hint: "Flux B2B — facture prête à déposer vers votre plateforme agréée.",
-            href: `/invoices/${invoiceId}`,
-          };
+      return {
+        nextAction: ereporting
+          ? {
+              label: "Ouvrir E-reporting",
+              hint: "Flux B2C / export / intra-UE — à regrouper dans un lot périodique.",
+              href: "/e-reporting",
+            }
+          : {
+              label: "Ouvrir Émission PA",
+              hint: "Flux B2B — facture prête à déposer vers votre plateforme agréée.",
+              href: `/invoices/${invoiceId}`,
+            },
+        secondaryActions: [],
+      };
   }
 }
 
@@ -132,6 +170,16 @@ export const getAnalysisDetail = createServerFn({ method: "POST" })
     );
     const verdict = verdictFrom(invoice.status, blockingCount, analyzed);
     const transactionType = invoice.transactionType ?? "B2B_DOMESTIC";
+    const blockCode =
+      invoice.validations.find((v) => v.blocking && v.code === "SELLER_SIREN_MISMATCH")?.code ??
+      invoice.validations.find((v) => v.blocking)?.code ??
+      null;
+    const { nextAction, secondaryActions } = nextActionFor(
+      verdict,
+      invoice.id,
+      transactionType,
+      blockCode === "SELLER_SIREN_MISMATCH" ? blockCode : null,
+    );
 
     return {
       detail: {
@@ -147,7 +195,9 @@ export const getAnalysisDetail = createServerFn({ method: "POST" })
         transactionType,
         analyzed,
         dispatch: dispatchFor(verdict, transactionType),
-        nextAction: nextActionFor(verdict, invoice.id, transactionType),
+        blockCode: blockCode === "SELLER_SIREN_MISMATCH" ? blockCode : null,
+        nextAction,
+        secondaryActions,
         validations: invoice.validations.map((v) => ({
           id: v.id,
           code: v.code,

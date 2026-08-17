@@ -109,8 +109,75 @@ export const analyzeInvoiceDocument = createServerFn({ method: "POST" })
               (i) => i.blocking && i.code === "SELLER_SIREN_MISMATCH",
             );
 
-            // Snapshot extraction même si enrichissement bloqué (autre émetteur)
-            if (draft) {
+            if (draft && sellerBlocked) {
+              // Hors tenant : audit émetteur seul — aucune donnée métier (client / lignes / établissements)
+              const auditDraft: ExtractedInvoiceDraft = {
+                number: null,
+                issueDate: null,
+                serviceDate: null,
+                currency: "EUR",
+                sellerLegalName: draft.sellerLegalName,
+                sellerSiren: draft.sellerSiren,
+                buyerLegalName: null,
+                buyerSiren: null,
+                buyerSiret: null,
+                buyerEmail: null,
+                buyerAddressLine1: null,
+                buyerPostal: null,
+                buyerCity: null,
+                buyerEstablishments: [],
+                operationCategory: null,
+                transactionType: null,
+                lines: [],
+                subtotalHt: null,
+                totalVat: null,
+                totalTtc: null,
+                confidence: draft.confidence,
+                notes: [
+                  `Émetteur SIREN ${draft.sellerSiren} ≠ organisation ${workspace.organization.siren} — données métier non enregistrées.`,
+                  "Action : Réception (achat) · remplacer le PDF en Sources · vérifier SIREN org.",
+                ],
+              };
+              draft = auditDraft;
+              await db.invoiceExtraction.upsert({
+                where: { invoiceId: invoice.id },
+                create: {
+                  invoiceId: invoice.id,
+                  source: extractionSource,
+                  confidence: auditDraft.confidence,
+                  draftJson: auditDraft as object,
+                  sellerSiren: auditDraft.sellerSiren,
+                  sellerLegalName: auditDraft.sellerLegalName,
+                  buyerSiren: null,
+                  buyerSiret: null,
+                  buyerLegalName: null,
+                },
+                update: {
+                  source: extractionSource,
+                  confidence: auditDraft.confidence,
+                  draftJson: auditDraft as object,
+                  sellerSiren: auditDraft.sellerSiren,
+                  sellerLegalName: auditDraft.sellerLegalName,
+                  buyerSiren: null,
+                  buyerSiret: null,
+                  buyerLegalName: null,
+                  extractedAt: new Date(),
+                },
+              });
+              await db.invoice.update({
+                where: { id: invoice.id },
+                data: {
+                  lifecycleEvents: {
+                    create: {
+                      status: "BLOCKED",
+                      scope: "EMISSION",
+                      source: "ai-extract",
+                      message: `Émetteur hors tenant (SIREN ${auditDraft.sellerSiren}) — extraction métier annulée`,
+                    },
+                  },
+                },
+              });
+            } else if (draft) {
               await db.invoiceExtraction.upsert({
                 where: { invoiceId: invoice.id },
                 create: {
@@ -138,7 +205,7 @@ export const analyzeInvoiceDocument = createServerFn({ method: "POST" })
               });
             }
 
-            // Ne pas enrichir une vente si l’émetteur n’est pas l’org (autre entreprise)
+            // Enrichissement vente uniquement si émetteur = org
             if (applyExtraction && draft && !sellerBlocked) {
               // Matching acheteur
               let counterpartyId = invoice.counterpartyId;

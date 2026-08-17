@@ -359,8 +359,9 @@ async function callLlmJson(system: string, user: string): Promise<string | null>
     }
   }
 
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return null;
+  const apiKey = process.env.OPENAI_API_KEY?.trim();
+  // Skip placeholders / truncated keys (avoids noisy 401 spam in logs)
+  if (!apiKey || apiKey.length < 20 || !apiKey.startsWith("sk-")) return null;
 
   try {
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -470,14 +471,17 @@ export function buildRemediationTips(
   const tips: RemediationTip[] = [];
 
   if (blockingCodes.includes("SELLER_SIREN_MISMATCH")) {
-    tips.push({
-      code: "SELLER_SIREN_MISMATCH",
-      title: "Émetteur ≠ votre entreprise",
-      detail:
-        "Le SIREN de l’émetteur sur le PDF ne correspond pas à votre organisation. Les ventes doivent être émises sous votre SIREN (plusieurs établissements / SIRET OK).",
-      action:
-        "Si c’est une facture fournisseur (achat) → importer via Réception PA. Si c’est bien votre vente → corriger le PDF ou les paramètres SIREN org.",
-    });
+    // Hors tenant : un seul tip métier — pas d’incitation à « corriger » acheteur / lignes
+    return [
+      {
+        code: "SELLER_SIREN_MISMATCH",
+        title: "Émetteur hors tenant — données non enregistrées",
+        detail:
+          "Le SIREN émetteur du PDF ≠ votre organisation. Aucun client, ligne ni établissement n’a été écrit. Les ventes Sources / Émission doivent être sous votre SIREN (plusieurs SIRET OK).",
+        action:
+          "1) Facture fournisseur → Réception PA (/inbox). 2) Mauvais PDF → remplacer/supprimer en Sources. 3) Bonne vente, mauvais compte → vérifier SIREN org (Paramètres).",
+      },
+    ];
   }
   if (blockingCodes.includes("SELLER_NAME_MISMATCH")) {
     tips.push({

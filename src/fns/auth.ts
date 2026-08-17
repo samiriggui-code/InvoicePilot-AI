@@ -108,6 +108,27 @@ export const logoutUser = createServerFn({ method: "POST" }).handler(async () =>
   return { success: true };
 });
 
+/** Verrouille la session en cours sans se déconnecter (poste laissé sans surveillance). */
+export const lockSession = createServerFn({ method: "POST" }).handler(async () => {
+  const { lockCurrentSession } = await import("@/lib/auth-server.server");
+  await lockCurrentSession();
+  return { success: true };
+});
+
+/** État du verrou + identité de l’utilisateur pour l’écran de verrouillage. */
+export const getSessionLockInfo = createServerFn({ method: "GET" }).handler(async () => {
+  const { isCurrentSessionLocked, resolveSessionUser } = await import("@/lib/auth-server.server");
+  const [locked, user] = await Promise.all([isCurrentSessionLocked(), resolveSessionUser()]);
+  return { locked, user };
+});
+
+export const unlockSession = createServerFn({ method: "POST" })
+  .validator((data: { password: string }) => data)
+  .handler(async ({ data }) => {
+    const { unlockCurrentSession } = await import("@/lib/auth-server.server");
+    return unlockCurrentSession(data.password);
+  });
+
 /** Mise à jour du profil connecté (nom + avatar Metronic). */
 export const updateProfile = createServerFn({ method: "POST" })
   .validator((data: { name: string; avatarKey?: string | null }) => data)
